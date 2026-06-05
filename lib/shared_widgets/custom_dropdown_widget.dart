@@ -40,7 +40,7 @@ class CustomDropdownWidget<T> extends StatelessWidget {
             ),
           ),
           width: width ?? constraints.maxWidth,
-          textStyle: const TextStyle(color: AppColors.oldPrimaryDeep, fontSize: 16),
+          textStyle: const TextStyle(color: AppColors.primaryDeep, fontSize: 16),
 
           initialSelection: initialSelection,
           inputDecorationTheme: InputDecorationTheme(

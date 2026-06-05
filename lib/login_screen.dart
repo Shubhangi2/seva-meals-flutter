@@ -4,6 +4,10 @@ import 'package:seva_meal/core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:seva_meal/shared_widgets/custom_button.dart';
 import 'package:seva_meal/shared_widgets/custom_text_form_field.dart';
+import 'package:seva_meal/shared_widgets/google_widget.dart';
+import 'package:seva_meal/shared_widgets/upsidedown_clipper.dart';
+import 'package:wave/config.dart';
+import 'package:wave/wave.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,18 +34,49 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    // mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                      Image.asset('assets_hk/hk_logo.png', width: 200, height: 200),
-                      Form(
-                        key: formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  // mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    ClipPath(
+                      clipper: WaveClipper(),
+                      child: Container(
+                        width: double.infinity,
+                        height: MediaQuery.of(context).size.height * 0.33,
+                        color: const Color.fromARGB(255, 218, 237, 255),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset('assets/app_logo.png', height: 130),
+                            SizedBox(height: 12),
+                            Text(
+                              'Food that carries kindness',
+                              style: TextStyle(
+                                color: Color(0xff0D2A3C),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(height: 50), // padding so wave doesn't cut text
+                          ],
+                        ),
+                      ),
+                    ),
+                    Form(
+                      key: formKey,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 24.0, right: 24, bottom: 24),
                         child: Column(
                           children: [
+                            // SizedBox(
+                            //   width: double.infinity,
+                            // child:
+                            Text(
+                              "Login",
+                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            ),
+                            // ),
+                            SizedBox(height: 12),
                             CustomTextFormField(
                               controller: userNameController,
                               label: "Username",
@@ -52,10 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               borderColor: AppColors.grayMedium,
                               hintText: "Enter Username",
                               hintTextColor: AppColors.grayMedium,
-                              prefixIcon: const Icon(
-                                Icons.person,
-                                color: AppColors.oldprimaryDeepest,
-                              ),
+                              prefixIcon: const Icon(Icons.person, color: AppColors.primary),
                               onValidate: (value) {
                                 if (value.isEmpty) {
                                   return "Please enter username";
@@ -63,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                               textInputType: TextInputType.number,
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 24),
                             CustomTextFormField(
                               controller: passwordController,
                               inputFormatters: [
@@ -84,15 +116,31 @@ class _LoginScreenState extends State<LoginScreen> {
                               textInputType: TextInputType.number,
                             ),
 
-                            const SizedBox(height: 48),
-                            CustomButton(text: "Login", onPressed: () {}),
-
                             const SizedBox(height: 32),
+                            CustomButton(text: "Login", onPressed: () {}),
+                            const SizedBox(height: 24),
+                            Text("or"),
+                            const SizedBox(height: 24),
+                            GoogleWidget.GoogleWidget(),
+                            const SizedBox(height: 24),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("Don't have an account?"),
+                                TextButton(
+                                  onPressed: () {},
+                                  child: const Text(
+                                    "Sign up",
+                                    style: TextStyle(color: Colors.blue),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),

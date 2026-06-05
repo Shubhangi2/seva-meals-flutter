@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:seva_meal/core/app_colors.dart';
+import 'package:seva_meal/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,21 +14,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Seva Meals',
       debugShowCheckedModeBanner: false,
-      home: const MyHomePage(),
+      theme: ThemeData(primaryColor: AppColors.primary, scaffoldBackgroundColor: Colors.white),
+      home: const LoginScreen(),
     );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text('Welcome')));
   }
 }

@@ -32,14 +32,14 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: height,
+      height: height ?? 52,
       width: width ?? double.infinity,
       decoration: BoxDecoration(
         border: Border.all(
           width: borderColor == null ? 0 : 1,
           color: borderColor ?? Colors.transparent,
         ),
-        borderRadius: BorderRadius.circular(borderRadius ?? 18),
+        borderRadius: BorderRadius.circular(borderRadius ?? 32),
         color: color ?? AppColors.primary,
       ),
       child: ElevatedButton(

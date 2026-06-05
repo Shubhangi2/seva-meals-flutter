@@ -46,13 +46,13 @@ class CustomTextFormField extends StatelessWidget {
           return const TextStyle(color: AppColors.primaryDeepest);
         }),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(24),
           borderSide: const BorderSide(color: AppColors.primary, width: 2.0),
         ),
         label: Text(label),
         alignLabelWithHint: true,
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(24),
           borderSide: BorderSide(color: borderColor ?? AppColors.grayLight),
         ),
 
