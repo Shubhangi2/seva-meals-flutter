@@ -15,10 +15,6 @@ void showSnackBar(BuildContext context, String content, bool isSuccess) {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              isSuccess
-                  ? Image.asset('assets/checked.png', width: 30, height: 30)
-                  : Image.asset('assets/close.png', width: 30, height: 30),
-              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   content,

@@ -12,7 +12,20 @@
           "package_name": "com.example.seva_meal"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "52083250037-2s6g0n1ke59151eantcfbdjcs0rqq21q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.seva_meal",
+            "certificate_hash": "2ed2ca39b067f7e1350b6da3069006906b52cc50"
+          }
+        },
+        {
+          "client_id": "52083250037-sp91ppcud0kbmutus63h0j4cgruj5sdv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyC3Z0Jlrxlc6J7x-3m0xQvITsWn2g02lHw"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "52083250037-sp91ppcud0kbmutus63h0j4cgruj5sdv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "52083250037-gtk56h4riurjci31ac09tdd67strsioe.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.sevaMeal"
+              }
+            }
+          ]
         }
       }
     }
