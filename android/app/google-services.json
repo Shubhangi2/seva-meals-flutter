@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "52083250037",
+    "project_id": "seva-meal",
+    "storage_bucket": "seva-meal.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52083250037:android:7cb5d386be25223306793c",
+        "android_client_info": {
+          "package_name": "com.example.seva_meal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3Z0Jlrxlc6J7x-3m0xQvITsWn2g02lHw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

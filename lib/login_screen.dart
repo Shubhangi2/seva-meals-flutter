@@ -6,8 +6,6 @@ import 'package:seva_meal/shared_widgets/custom_button.dart';
 import 'package:seva_meal/shared_widgets/custom_text_form_field.dart';
 import 'package:seva_meal/shared_widgets/google_widget.dart';
 import 'package:seva_meal/shared_widgets/upsidedown_clipper.dart';
-import 'package:wave/config.dart';
-import 'package:wave/wave.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
