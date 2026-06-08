@@ -5,26 +5,25 @@ import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
 
 import 'package:flutter/material.dart';
-import 'package:seva_meal/home_screen.dart';
-import 'package:seva_meal/login_screen.dart';
+import 'package:seva_meal/screens/donor/donor_dashboard_screen.dart';
 import 'package:seva_meal/providers/user_auth_provider.dart';
+import 'package:seva_meal/screens/register_screen.dart';
 import 'package:seva_meal/shared_widgets/custom_button.dart';
 import 'package:seva_meal/shared_widgets/custom_text_form_field.dart';
 import 'package:seva_meal/shared_widgets/google_widget.dart';
 import 'package:seva_meal/shared_widgets/show_snackbar.dart';
 import 'package:seva_meal/shared_widgets/upsidedown_clipper.dart';
 
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   final formKey = GlobalKey<FormState>();
   final TextEditingController userNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
 
@@ -38,7 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     await GoogleSignIn.instance.initialize();
   }
 
-  Future<void> registerUser(bool isGoogle) async {
+  Future<void> loginUser(bool isGoogle) async {
     final res;
     setState(() {
       isLoading = true;
@@ -47,9 +46,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       res = await context.read<UserAuthProvider>().authenticateUserWithGoogle();
     } else {
       if (!formKey.currentState!.validate()) return;
-      res = await context.read<UserAuthProvider>().createUserWithEmailAndPassword(
+      res = await context.read<UserAuthProvider>().loginWithemailAndPassword(
         userNameController.text,
-        emailController.text,
         passwordController.text,
       );
     }
@@ -60,7 +58,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       (r) => {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => DashboardScreen()),
+          MaterialPageRoute(builder: (context) => DonorDashboardScreen()),
           (_) => false,
         ),
       },
@@ -101,7 +99,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            SizedBox(height: 50), // padding so wave doesn't cut text
+                            SizedBox(height: 50),
                           ],
                         ),
                       ),
@@ -113,31 +111,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: Column(
                           children: [
                             Text(
-                              "Register",
+                              "Login",
                               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                             ),
                             // ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             CustomTextFormField(
                               controller: userNameController,
-                              inputFormatters: [LengthLimitingTextInputFormatter(50)],
-                              label: "Name",
-                              hintText: "Enter Your name",
-                              obscureText: true,
-                              hintTextColor: AppColors.grayMedium,
-                              borderColor: AppColors.grayMedium,
-                              prefixIcon: const Icon(Icons.lock, color: AppColors.primaryDeepest),
-                              onValidate: (value) {
-                                if (value.isEmpty) {
-                                  return "Please enter name";
-                                }
-                              },
-                              textInputType: TextInputType.text,
-                            ),
-
-                            SizedBox(height: 24),
-                            CustomTextFormField(
-                              controller: emailController,
                               label: "Email",
                               inputFormatters: [LengthLimitingTextInputFormatter(50)],
                               borderColor: AppColors.grayMedium,
@@ -174,9 +154,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                             const SizedBox(height: 32),
                             CustomButton(
-                              text: "Register",
+                              text: "Login",
                               onPressed: () {
-                                registerUser(false);
+                                loginUser(false);
                               },
                             ),
                             const SizedBox(height: 24),
@@ -184,7 +164,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             const SizedBox(height: 24),
                             InkWell(
                               onTap: () {
-                                registerUser(true);
+                                loginUser(true);
                               },
                               child: GoogleWidget.GoogleWidget(),
                             ),
@@ -192,16 +172,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text("Already have an account? "),
+                                Text("Don't have an account?"),
                                 TextButton(
                                   onPressed: () {
                                     Navigator.pushAndRemoveUntil(
                                       context,
-                                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                                      MaterialPageRoute(builder: (context) => RegisterScreen()),
                                       (_) => false,
                                     );
                                   },
-                                  child: const Text("login", style: TextStyle(color: Colors.blue)),
+                                  child: const Text(
+                                    "Register",
+                                    style: TextStyle(color: Colors.blue),
+                                  ),
                                 ),
                               ],
                             ),

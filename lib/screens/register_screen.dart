@@ -5,25 +5,26 @@ import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
 
 import 'package:flutter/material.dart';
-import 'package:seva_meal/home_screen.dart';
+import 'package:seva_meal/screens/donor/donor_dashboard_screen.dart';
+import 'package:seva_meal/screens/login_screen.dart';
 import 'package:seva_meal/providers/user_auth_provider.dart';
-import 'package:seva_meal/register_screen.dart';
 import 'package:seva_meal/shared_widgets/custom_button.dart';
 import 'package:seva_meal/shared_widgets/custom_text_form_field.dart';
 import 'package:seva_meal/shared_widgets/google_widget.dart';
 import 'package:seva_meal/shared_widgets/show_snackbar.dart';
 import 'package:seva_meal/shared_widgets/upsidedown_clipper.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final formKey = GlobalKey<FormState>();
   final TextEditingController userNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
 
@@ -37,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
     await GoogleSignIn.instance.initialize();
   }
 
-  Future<void> loginUser(bool isGoogle) async {
+  Future<void> registerUser(bool isGoogle) async {
     final res;
     setState(() {
       isLoading = true;
@@ -46,8 +47,9 @@ class _LoginScreenState extends State<LoginScreen> {
       res = await context.read<UserAuthProvider>().authenticateUserWithGoogle();
     } else {
       if (!formKey.currentState!.validate()) return;
-      res = await context.read<UserAuthProvider>().loginWithemailAndPassword(
+      res = await context.read<UserAuthProvider>().createUserWithEmailAndPassword(
         userNameController.text,
+        emailController.text,
         passwordController.text,
       );
     }
@@ -58,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
       (r) => {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => DashboardScreen()),
+          MaterialPageRoute(builder: (context) => DonorDashboardScreen()),
           (_) => false,
         ),
       },
@@ -99,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            SizedBox(height: 50),
+                            SizedBox(height: 50), // padding so wave doesn't cut text
                           ],
                         ),
                       ),
@@ -111,13 +113,31 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Column(
                           children: [
                             Text(
-                              "Login",
+                              "Register",
                               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                             ),
                             // ),
-                            SizedBox(height: 12),
+                            const SizedBox(height: 12),
                             CustomTextFormField(
                               controller: userNameController,
+                              inputFormatters: [LengthLimitingTextInputFormatter(50)],
+                              label: "Name",
+                              hintText: "Enter Your name",
+                              obscureText: true,
+                              hintTextColor: AppColors.grayMedium,
+                              borderColor: AppColors.grayMedium,
+                              prefixIcon: const Icon(Icons.lock, color: AppColors.primaryDeepest),
+                              onValidate: (value) {
+                                if (value.isEmpty) {
+                                  return "Please enter name";
+                                }
+                              },
+                              textInputType: TextInputType.text,
+                            ),
+
+                            SizedBox(height: 24),
+                            CustomTextFormField(
+                              controller: emailController,
                               label: "Email",
                               inputFormatters: [LengthLimitingTextInputFormatter(50)],
                               borderColor: AppColors.grayMedium,
@@ -154,9 +174,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
                             const SizedBox(height: 32),
                             CustomButton(
-                              text: "Login",
+                              text: "Register",
                               onPressed: () {
-                                loginUser(false);
+                                registerUser(false);
                               },
                             ),
                             const SizedBox(height: 24),
@@ -164,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 24),
                             InkWell(
                               onTap: () {
-                                loginUser(true);
+                                registerUser(true);
                               },
                               child: GoogleWidget.GoogleWidget(),
                             ),
@@ -172,19 +192,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text("Don't have an account?"),
+                                Text("Already have an account? "),
                                 TextButton(
                                   onPressed: () {
                                     Navigator.pushAndRemoveUntil(
                                       context,
-                                      MaterialPageRoute(builder: (context) => RegisterScreen()),
+                                      MaterialPageRoute(builder: (context) => LoginScreen()),
                                       (_) => false,
                                     );
                                   },
-                                  child: const Text(
-                                    "Register",
-                                    style: TextStyle(color: Colors.blue),
-                                  ),
+                                  child: const Text("login", style: TextStyle(color: Colors.blue)),
                                 ),
                               ],
                             ),

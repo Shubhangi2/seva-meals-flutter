@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
 import 'package:seva_meal/core/app_service.dart';
 import 'package:seva_meal/firebase_options.dart';
-import 'package:seva_meal/login_screen.dart';
+import 'package:seva_meal/screens/login_screen.dart';
+import 'package:seva_meal/screens/select_role_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
       title: 'Seva Meals',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primaryColor: AppColors.primary, scaffoldBackgroundColor: Colors.white),
-      home: const LoginScreen(),
+      home: const SelectRoleScreen(),
     );
   }
 }
