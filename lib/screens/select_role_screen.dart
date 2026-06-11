@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:seva_meal/core/app_colors.dart';
 import 'package:seva_meal/screens/dashboard_screen.dart';
 
-import 'package:seva_meal/shared_widgets/custom_button.dart';
+import 'package:seva_meal/screens/shared_widgets/custom_button.dart';
 
 class SelectRoleScreen extends StatefulWidget {
   const SelectRoleScreen({super.key});

@@ -25,8 +25,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   List<Widget> donorList = const [
     DonorHomeScreen(),
-    DonorCreateScreen(),
     DonorHistoryScreen(),
+    DonorCreateScreen(),
     DonorNotificatoinScreen(),
     DonorAccountScreen(),
   ];

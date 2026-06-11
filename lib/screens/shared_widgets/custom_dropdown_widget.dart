@@ -34,7 +34,7 @@ class CustomDropdownWidget<T> extends StatelessWidget {
             backgroundColor: WidgetStateProperty.all(Colors.white),
             shape: WidgetStateProperty.all(
               RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(16.0),
                 side: const BorderSide(color: AppColors.oldBorderColor, width: 1.0),
               ),
             ),

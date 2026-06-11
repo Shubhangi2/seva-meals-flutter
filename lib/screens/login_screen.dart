@@ -8,11 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:seva_meal/screens/dashboard_screen.dart';
 import 'package:seva_meal/providers/user_auth_provider.dart';
 import 'package:seva_meal/screens/register_screen.dart';
-import 'package:seva_meal/shared_widgets/custom_button.dart';
-import 'package:seva_meal/shared_widgets/custom_text_form_field.dart';
-import 'package:seva_meal/shared_widgets/google_widget.dart';
-import 'package:seva_meal/shared_widgets/show_snackbar.dart';
-import 'package:seva_meal/shared_widgets/upsidedown_clipper.dart';
+import 'package:seva_meal/screens/shared_widgets/custom_button.dart';
+import 'package:seva_meal/screens/shared_widgets/custom_text_form_field.dart';
+import 'package:seva_meal/screens/shared_widgets/google_widget.dart';
+import 'package:seva_meal/screens/shared_widgets/show_snackbar.dart';
+import 'package:seva_meal/screens/shared_widgets/upsidedown_clipper.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
