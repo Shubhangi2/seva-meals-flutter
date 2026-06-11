@@ -13,6 +13,7 @@ import 'package:seva_meal/screens/shared_widgets/custom_text_form_field.dart';
 import 'package:seva_meal/screens/shared_widgets/google_widget.dart';
 import 'package:seva_meal/screens/shared_widgets/show_snackbar.dart';
 import 'package:seva_meal/screens/shared_widgets/upsidedown_clipper.dart';
+import 'package:seva_meal/screens/shared_widgets/wave_clip_banner.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -80,30 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    ClipPath(
-                      clipper: WaveClipper(),
-                      child: Container(
-                        width: double.infinity,
-                        height: MediaQuery.of(context).size.height * 0.33,
-                        color: const Color.fromARGB(255, 218, 237, 255),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset('assets/app_logo.png', height: 130),
-                            SizedBox(height: 12),
-                            Text(
-                              'Food that carries kindness',
-                              style: TextStyle(
-                                color: Color(0xff0D2A3C),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            SizedBox(height: 50),
-                          ],
-                        ),
-                      ),
-                    ),
+                    WaveClipBanner(isLogoRequired: true),
                     Form(
                       key: formKey,
                       child: Padding(
