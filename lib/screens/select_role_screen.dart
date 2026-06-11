@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:seva_meal/core/app_colors.dart';
-import 'package:seva_meal/screens/donor/donor_dashboard_screen.dart';
-import 'package:seva_meal/screens/volunteer/volunteer_dashboard_screen.dart';
+import 'package:seva_meal/screens/dashboard_screen.dart';
+
 import 'package:seva_meal/shared_widgets/custom_button.dart';
 
 class SelectRoleScreen extends StatefulWidget {
@@ -58,7 +58,7 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                           onPressed: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => DonorDashboardScreen()),
+                              MaterialPageRoute(builder: (context) => DashboardScreen(role: '')),
                             );
                           },
                           height: 42,
@@ -115,7 +115,7 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                           onPressed: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => VolunteerDashboardScreen()),
+                              MaterialPageRoute(builder: (context) => DashboardScreen(role: '')),
                             );
                           },
                           height: 42,

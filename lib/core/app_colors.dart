@@ -6,7 +6,7 @@ class AppColors {
   static const Color primaryDeep = Color(0xff1D4B68);
   static const Color primaryDeepest = Color(0xff0D2A3C);
   static const Color primaryLight = Color(0xff4095C9);
-  static const Color primaryLightest = Color(0xffC2DEF9);
+  static const Color primaryLightest = Color(0xFFDAEDFF);
   static const Color bgColor = Color(0xFFF5FAFF);
   static const Color green = Color(0xff9fca0b);
   static const Color blue = Color(0xff6CBBF3);

@@ -1,11 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
 
 import 'package:flutter/material.dart';
-import 'package:seva_meal/screens/donor/donor_dashboard_screen.dart';
+import 'package:seva_meal/screens/dashboard_screen.dart';
 import 'package:seva_meal/screens/login_screen.dart';
 import 'package:seva_meal/providers/user_auth_provider.dart';
 import 'package:seva_meal/shared_widgets/custom_button.dart';
@@ -60,7 +59,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       (r) => {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => DonorDashboardScreen()),
+          MaterialPageRoute(builder: (context) => DashboardScreen(role: '')),
           (_) => false,
         ),
       },
