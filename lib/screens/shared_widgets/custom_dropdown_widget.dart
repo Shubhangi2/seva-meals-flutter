@@ -35,7 +35,7 @@ class CustomDropdownWidget<T> extends StatelessWidget {
             shape: WidgetStateProperty.all(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.0),
-                side: const BorderSide(color: AppColors.oldBorderColor, width: 1.0),
+                side: const BorderSide(color: AppColors.borderColor, width: 1.0),
               ),
             ),
           ),
@@ -44,16 +44,16 @@ class CustomDropdownWidget<T> extends StatelessWidget {
 
           initialSelection: initialSelection,
           inputDecorationTheme: InputDecorationTheme(
-            hintStyle: const TextStyle(color: AppColors.oldGrayDark),
+            hintStyle: const TextStyle(color: AppColors.grayDark),
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.0),
-              borderSide: const BorderSide(color: AppColors.oldBorderColor, width: 1.0),
+              borderSide: const BorderSide(color: AppColors.borderColor, width: 1.0),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.0),
-              borderSide: const BorderSide(color: AppColors.oldBorderColor, width: 1.0),
+              borderSide: const BorderSide(color: AppColors.borderColor, width: 1.0),
             ),
 
             contentPadding: padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 0),

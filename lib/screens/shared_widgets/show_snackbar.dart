@@ -9,7 +9,7 @@ void showSnackBar(BuildContext context, String content, bool isSuccess) {
         content: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: isSuccess ? AppColors.greenToastColor : AppColors.redToastColor,
+            color: isSuccess ? AppColors.greenToastColor : AppColors.redLightest,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(

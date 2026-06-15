@@ -15,93 +15,176 @@ class _DonorAccountScreenState extends State<DonorAccountScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        backgroundColor: const Color.fromARGB(255, 250, 250, 250),
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          toolbarHeight: 46,
+          backgroundColor: AppColors.primaryDeep,
           title: Text(
             "My Donor Account",
-            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 18),
+            style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white, fontSize: 18),
           ),
         ),
-        body: Column(
-          children: [
-            Stack(
-              children: [
-                WaveClipBanner(height: 190),
-                SizedBox(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      spacing: 4,
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Stack(
+                children: [
+                  WaveClipBanner(height: 190),
+                  Column(children: [profileHeader(), legalAndSupportWidget()]),
+                ],
+              ),
+              accountWidget(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-                      children: [
-                        Row(
-                          spacing: 16,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(color: AppColors.primary, width: 1),
-                              ),
-                              child: ClipOval(
-                                child: Image.asset(
-                                  'assets/profile.png',
-                                  height: 90,
-                                  width: 90,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            Column(
-                              spacing: 6,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Shubhangi Jadhav",
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                ),
-                                Row(
-                                  spacing: 8,
-                                  children: [
-                                    Icon(Icons.email_outlined, color: AppColors.grayDark, size: 20),
-                                    Text(
-                                      "jshubhangi958@gmail.com",
-                                      style: TextStyle(color: AppColors.grayDark),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  spacing: 8,
-                                  children: [
-                                    Icon(Icons.phone_outlined, color: AppColors.grayDark, size: 20),
-                                    Text(
-                                      "+91 9702212438",
-                                      style: TextStyle(color: AppColors.grayDark),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  spacing: 8,
-                                  children: [
-                                    Icon(
-                                      Icons.location_on_outlined,
-                                      color: AppColors.grayDark,
-                                      size: 20,
-                                    ),
-                                    Text("Airoli", style: TextStyle(color: AppColors.grayDark)),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+  Widget legalAndSupportWidget() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        spacing: 8,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 12),
+          Text(
+            "Legal & support",
+            style: TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          actionCard(title: "Privacy policy", iconData: Icons.security_outlined),
+          actionCard(title: "Terms of use", iconData: Icons.document_scanner_outlined),
+          actionCard(title: "Help", iconData: Icons.help_outline_rounded),
+        ],
+      ),
+    );
+  }
+
+  Widget accountWidget() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        spacing: 8,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Account",
+            style: TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          actionCard(title: "Change Password", iconData: Icons.lock_outline),
+          actionCard(
+            title: "Delete account",
+            iconData: Icons.delete_outline,
+            bgcolor: AppColors.redLightest,
+            color: AppColors.red,
+          ),
+          SizedBox(height: 12),
+          actionCard(
+            title: "Logout",
+            iconData: Icons.logout,
+            bgcolor: AppColors.redLightest,
+            color: AppColors.red,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget profileHeader() {
+    return SizedBox(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 16,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.grayBrightest, width: 1),
+              ),
+              child: ClipOval(
+                child: Image.asset('assets/profile.png', height: 90, width: 90, fit: BoxFit.cover),
+              ),
             ),
+            Expanded(
+              child: Column(
+                spacing: 6,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Shubhangi Jadhav",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  Row(
+                    spacing: 8,
+                    children: [
+                      Icon(Icons.email_outlined, color: AppColors.grayDarkest, size: 20),
+                      Text(
+                        "jshubhangi958@gmail.com",
+                        style: TextStyle(color: AppColors.grayDarkest),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    spacing: 8,
+                    children: [
+                      Icon(Icons.phone_outlined, color: AppColors.grayDarkest, size: 20),
+                      Text("+91 9702212438", style: TextStyle(color: AppColors.grayDarkest)),
+                    ],
+                  ),
+                  Row(
+                    spacing: 8,
+                    children: [
+                      Icon(Icons.location_on_outlined, color: AppColors.grayDarkest, size: 20),
+                      Text("Airoli", style: TextStyle(color: AppColors.grayDarkest)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.edit_rounded, color: AppColors.primary),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget actionCard({
+    required String title,
+    required IconData iconData,
+    Color? bgcolor,
+    Color? color,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.grayBrightest, width: 1),
+      ),
+      width: double.infinity,
+      child: Row(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: bgcolor ?? AppColors.primaryLightestIcon,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(iconData, color: color ?? AppColors.primary),
+            ),
+          ),
+          SizedBox(width: 12),
+          Text(
+            title,
+            style: TextStyle(color: color ?? AppColors.grayDarkest, fontWeight: FontWeight.bold),
+          ),
+          Spacer(),
+          Icon(Icons.chevron_right, color: bgcolor ?? AppColors.primaryLight),
+        ],
       ),
     );
   }
