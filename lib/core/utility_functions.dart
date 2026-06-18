@@ -67,4 +67,14 @@ class UtilityFunctions {
     }
     return 'An unexpected error occurred.';
   }
+
+  static String generateId(String prefix) {
+    final now = DateTime.now();
+    final formatted =
+        '${now.year}${_pad(now.month)}${_pad(now.day)}_'
+        '${_pad(now.hour)}${_pad(now.minute)}${_pad(now.second)}';
+    return '${prefix}_$formatted';
+  }
+
+  static String _pad(int value) => value.toString().padLeft(2, '0');
 }

@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:seva_meal/core/app_colors.dart';
+import 'package:seva_meal/core/constants.dart';
+import 'package:seva_meal/db/shared_prefs.dart';
 import 'package:seva_meal/screens/dashboard_screen.dart';
 
 import 'package:seva_meal/screens/shared_widgets/custom_button.dart';
@@ -55,10 +58,14 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                         ),
                         CustomButton(
                           text: "Donor",
-                          onPressed: () {
+                          onPressed: () async {
+                            await SharedPrefs().updateRole(Constants.ROLE_VOLUNTEER);
+
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => DashboardScreen(role: '')),
+                              MaterialPageRoute(
+                                builder: (context) => DashboardScreen(role: Constants.ROLE_DONOR),
+                              ),
                             );
                           },
                           height: 42,
@@ -112,10 +119,15 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                         ),
                         CustomButton(
                           text: "Volunteer",
-                          onPressed: () {
+                          onPressed: () async {
+                            await SharedPrefs().updateRole(Constants.ROLE_VOLUNTEER);
+
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => DashboardScreen(role: '')),
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    DashboardScreen(role: Constants.ROLE_VOLUNTEER),
+                              ),
                             );
                           },
                           height: 42,

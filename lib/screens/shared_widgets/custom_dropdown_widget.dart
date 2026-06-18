@@ -48,11 +48,11 @@ class CustomDropdownWidget<T> extends StatelessWidget {
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.0),
+              borderRadius: BorderRadius.circular(24.0),
               borderSide: const BorderSide(color: AppColors.borderColor, width: 1.0),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.0),
+              borderRadius: BorderRadius.circular(24.0),
               borderSide: const BorderSide(color: AppColors.borderColor, width: 1.0),
             ),
 

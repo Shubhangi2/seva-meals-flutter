@@ -1,19 +1,32 @@
 class UserModel {
-  final String role;
+  final String id;
+  String role;
   final String fullName;
-  final int mobileNo;
+  final String mobileNo;
+  final String email;
+  final String city;
 
-  UserModel({required this.role, required this.fullName, required this.mobileNo});
+  UserModel({
+    required this.id,
+    required this.role,
+    required this.fullName,
+    required this.mobileNo,
+    required this.email,
+    required this.city,
+  });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
+      id: json['id'] ?? '',
       role: json['role'] ?? '',
-      fullName: json['Fullname'] ?? '',
-      mobileNo: int.parse(json['Mobileno'].toString()),
+      fullName: json['fullname'] ?? '',
+      mobileNo: json['Mobileno'] ?? '',
+      email: json['email'] ?? '',
+      city: json['city'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'role': role, 'Fullname': fullName, 'Mobileno': mobileNo};
+    return {'role': role, 'fullname': fullName, 'Mobileno': mobileNo, 'email': email, 'city': city};
   }
 }

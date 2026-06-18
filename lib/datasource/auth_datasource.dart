@@ -3,8 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:seva_meal/core/failure.dart';
+import 'package:seva_meal/db/shared_prefs.dart';
+import 'package:seva_meal/models/user_model.dart';
 
 class AuthDatasource {
+  final SharedPrefs sharedPrefs = SharedPrefs();
+
+  Future<void> saveUserInPrefs({required UserCredential credentials, String? fullName}) async {
+    await sharedPrefs.saveUserModel(
+      UserModel(
+        id: credentials.user?.uid ?? '',
+        role: '',
+        fullName: fullName ?? credentials.user?.displayName ?? '',
+        mobileNo: '',
+        email: credentials.user?.email ?? '',
+        city: '',
+      ),
+    );
+  }
+
   Future<Either<Failure, UserCredential>> createUserWithEmailAndPassword(
     String fullName,
     String email,
@@ -15,6 +32,8 @@ class AuthDatasource {
         email: email,
         password: password,
       );
+      if (credential.user?.uid == null) return left(Failure("User id is null"));
+      await saveUserInPrefs(credentials: credential, fullName: fullName);
       await credential.user!.updateDisplayName(fullName);
       return right(credential);
     } on FirebaseAuthException catch (e) {
@@ -41,7 +60,7 @@ class AuthDatasource {
       final credential = GoogleAuthProvider.credential(idToken: googleAuth.idToken);
 
       UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-
+      await saveUserInPrefs(credentials: userCredential);
       return right(userCredential);
     } catch (e) {
       print(e);
@@ -58,6 +77,7 @@ class AuthDatasource {
         email: email,
         password: password,
       );
+      await saveUserInPrefs(credentials: credential);
       return right(credential);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
