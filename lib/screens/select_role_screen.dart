@@ -1,14 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
 import 'package:seva_meal/core/constants.dart';
 import 'package:seva_meal/db/shared_prefs.dart';
+import 'package:seva_meal/models/user_model.dart';
+import 'package:seva_meal/providers/user_auth_provider.dart';
 import 'package:seva_meal/screens/dashboard_screen.dart';
 
 import 'package:seva_meal/screens/shared_widgets/custom_button.dart';
 
 class SelectRoleScreen extends StatefulWidget {
-  const SelectRoleScreen({super.key});
+  final UserModel user;
+  const SelectRoleScreen({super.key, required this.user});
 
   @override
   State<SelectRoleScreen> createState() => _SelectRoleScreenState();
@@ -59,7 +63,10 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                         CustomButton(
                           text: "Donor",
                           onPressed: () async {
-                            await SharedPrefs().updateRole(Constants.ROLE_VOLUNTEER);
+                            context.read<UserAuthProvider>().updateRoleToFirebase(
+                              Constants.ROLE_DONOR,
+                              widget.user.id,
+                            );
 
                             Navigator.pushReplacement(
                               context,
@@ -120,8 +127,10 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                         CustomButton(
                           text: "Volunteer",
                           onPressed: () async {
-                            await SharedPrefs().updateRole(Constants.ROLE_VOLUNTEER);
-
+                            context.read<UserAuthProvider>().updateRoleToFirebase(
+                              Constants.ROLE_VOLUNTEER,
+                              widget.user.id,
+                            );
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(

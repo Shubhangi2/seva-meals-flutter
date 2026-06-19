@@ -8,7 +8,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
 import 'package:seva_meal/core/constants.dart';
+import 'package:seva_meal/core/utils/user_session.dart';
 import 'package:seva_meal/models/post_model.dart';
+import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/providers/donor_provider.dart';
 import 'package:seva_meal/screens/shared_widgets/custom_button.dart';
 import 'package:seva_meal/screens/shared_widgets/custom_dropdown_widget.dart';
@@ -87,6 +89,9 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
     if (selectedCity == null) return showSnackBar(context, "Please select a city", false);
     if (selectedRegion == null) return showSnackBar(context, "Please select a region", false);
 
+    UserModel? user = UserSession().user;
+    if (user == null) return showSnackBar(context, "Failed to get user id", false);
+
     PostModel postModel = PostModel(
       title: titleController.text,
       description: descriptionController.text,
@@ -94,7 +99,7 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
       quantity: quantityController.text,
       city: selectedCity ?? '',
       region: selectedRegion ?? '',
-      donorId: '',
+      donorId: user.id,
       pickupAddress: pickupAddressController.text,
       pickupFoodPictureUrl: selectedImageUrl ?? '',
       status: Constants.STATUS_PENDING,

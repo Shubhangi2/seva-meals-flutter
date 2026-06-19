@@ -11,4 +11,8 @@ class DonorProvider extends ChangeNotifier {
   Future<Either<Failure, String>> createPost(PostModel postModel) async {
     return await datasource.createPost(postModel);
   }
+
+  Future<Either<Failure, List<PostModel>>> getPosts() async {
+    return await datasource.getPosts();
+  }
 }

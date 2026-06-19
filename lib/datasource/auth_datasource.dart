@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:seva_meal/core/constants.dart';
 import 'package:seva_meal/core/failure.dart';
 import 'package:seva_meal/db/shared_prefs.dart';
 import 'package:seva_meal/models/user_model.dart';
@@ -10,16 +13,27 @@ class AuthDatasource {
   final SharedPrefs sharedPrefs = SharedPrefs();
 
   Future<void> saveUserInPrefs({required UserCredential credentials, String? fullName}) async {
-    await sharedPrefs.saveUserModel(
-      UserModel(
-        id: credentials.user?.uid ?? '',
-        role: '',
-        fullName: fullName ?? credentials.user?.displayName ?? '',
-        mobileNo: '',
-        email: credentials.user?.email ?? '',
-        city: '',
-      ),
+    print(credentials.user?.uid);
+    UserModel user = UserModel(
+      id: credentials.user?.uid ?? '',
+      role: '',
+      fullName: fullName ?? credentials.user?.displayName ?? '',
+      mobileNo: '',
+      email: credentials.user?.email ?? '',
+      city: '',
     );
+    await uploadUserToFirebase(user);
+    await sharedPrefs.saveUserModel(user);
+  }
+
+  Future<void> uploadUserToFirebase(UserModel user) async {
+    final db = FirebaseFirestore.instance;
+    try {
+      final doc = await db.collection("users").add(user.toJson());
+      print(doc.id);
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<Either<Failure, UserCredential>> createUserWithEmailAndPassword(
@@ -89,5 +103,23 @@ class AuthDatasource {
       print(e);
     }
     return left(Failure("Failed to login"));
+  }
+
+  Future<void> signOut() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      await sharedPrefs.clearPrefs();
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> updateRoleToFirebase(String role, String uid) async {
+    final db = FirebaseFirestore.instance;
+    try {
+      await db.collection("users").doc(uid).update({"role": role});
+    } catch (e) {
+      print(e);
+    }
   }
 }

@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
 
 import 'package:flutter/material.dart';
+import 'package:seva_meal/core/utils/user_session.dart';
+import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/screens/dashboard_screen.dart';
 import 'package:seva_meal/providers/user_auth_provider.dart';
 import 'package:seva_meal/screens/register_screen.dart';
@@ -57,12 +59,22 @@ class _LoginScreenState extends State<LoginScreen> {
       (l) {
         showSnackBar(context, l.message, false);
       },
-      (r) => {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => SelectRoleScreen()),
-          (_) => false,
-        ),
+      (r) async {
+        UserModel? user = await UserSession().user;
+        if (user == null) return;
+        if (user.role.isNotEmpty) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => DashboardScreen(role: user.role)),
+            (_) => false,
+          );
+        } else {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => SelectRoleScreen(user: r)),
+            (_) => false,
+          );
+        }
       },
     );
 
@@ -93,7 +105,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               "Login",
                               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                             ),
-                            // ),
                             SizedBox(height: 12),
                             CustomTextFormField(
                               controller: userNameController,

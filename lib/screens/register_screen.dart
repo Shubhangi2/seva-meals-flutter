@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:seva_meal/screens/dashboard_screen.dart';
 import 'package:seva_meal/screens/login_screen.dart';
 import 'package:seva_meal/providers/user_auth_provider.dart';
+import 'package:seva_meal/screens/select_role_screen.dart';
 import 'package:seva_meal/screens/shared_widgets/custom_button.dart';
 import 'package:seva_meal/screens/shared_widgets/custom_text_form_field.dart';
 import 'package:seva_meal/screens/shared_widgets/google_widget.dart';
@@ -60,7 +61,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       (r) => {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => DashboardScreen(role: '')),
+          MaterialPageRoute(builder: (context) => SelectRoleScreen(user: r)),
           (_) => false,
         ),
       },

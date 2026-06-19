@@ -14,13 +14,19 @@ class SharedPrefs extends BasePrefs {
   }
 
   Future<void> saveUserModel(UserModel userModel) async {
+    print(userModel);
     await setString(Constants.USER_MODEL, jsonEncode(userModel.toJson()));
+  }
+
+  Future<void> clearKey(String key) async {
+    await remove(key);
   }
 
   Future<void> updateRole(String role) async {
     UserModel? user = await getUserModel();
     if (user == null) return;
     user.role = role;
+    print(user);
     await saveUserModel(user);
   }
 }

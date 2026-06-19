@@ -1,17 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
+import 'package:seva_meal/models/post_model.dart';
+import 'package:seva_meal/providers/donor_provider.dart';
 import 'package:seva_meal/screens/shared_widgets/donation_card.dart';
 import 'package:seva_meal/screens/shared_widgets/searchbar.dart';
 
-class DonorHistoryScreen extends StatefulWidget {
-  const DonorHistoryScreen({super.key});
+class HistoryScreen extends StatefulWidget {
+  final String role;
+  const HistoryScreen({super.key, required this.role});
 
   @override
-  State<DonorHistoryScreen> createState() => _DonorHistoryScreenState();
+  State<HistoryScreen> createState() => _HistoryScreenState();
 }
 
-class _DonorHistoryScreenState extends State<DonorHistoryScreen> {
-  List<String> items = ["one", "twp", "three", "four", "five"];
+class _HistoryScreenState extends State<HistoryScreen> {
+  List<PostModel> posts = [];
+
+  void initState() {
+    super.initState();
+
+    callAsyncTask();
+  }
+
+  Future<void> callAsyncTask() async {
+    final posts = await context.read<DonorProvider>().getPosts();
+    posts.fold((l) => print(l.message), (r) {
+      setState(() {
+        this.posts = r;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -32,12 +52,16 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen> {
                 ),
               ),
               SizedBox(height: 12),
-              CustomSearchBar(items: items, displayText: (item) => item, onSelected: (value) {}),
+              CustomSearchBar(
+                items: posts,
+                displayText: (item) => item.title,
+                onSelected: (value) {},
+              ),
               SizedBox(height: 12),
               Expanded(
                 child: ListView.separated(
-                  itemBuilder: (context, index) => DonationCard(),
-                  itemCount: 5,
+                  itemBuilder: (context, index) => DonationCard(postModel: posts[index]),
+                  itemCount: posts.length,
                   separatorBuilder: (context, index) => const SizedBox(height: 16),
                 ),
               ),

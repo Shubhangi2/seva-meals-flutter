@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
-import 'package:seva_meal/screens/shared_widgets/utility_widgets.dart';
+import 'package:seva_meal/core/constants.dart';
+import 'package:seva_meal/providers/user_auth_provider.dart';
+import 'package:seva_meal/screens/login_screen.dart';
 import 'package:seva_meal/screens/shared_widgets/wave_clip_banner.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class DonorAccountScreen extends StatefulWidget {
-  const DonorAccountScreen({super.key});
+class AccountScreen extends StatefulWidget {
+  final String role;
+  const AccountScreen({super.key, required this.role});
 
   @override
-  State<DonorAccountScreen> createState() => _DonorAccountScreenState();
+  State<AccountScreen> createState() => _AccountScreenState();
 }
 
-class _DonorAccountScreenState extends State<DonorAccountScreen> {
+class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -53,9 +58,30 @@ class _DonorAccountScreenState extends State<DonorAccountScreen> {
             "Legal & support",
             style: TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          actionCard(title: "Privacy policy", iconData: Icons.security_outlined),
-          actionCard(title: "Terms of use", iconData: Icons.document_scanner_outlined),
-          actionCard(title: "Help", iconData: Icons.help_outline_rounded),
+          actionCard(
+            title: "Privacy policy",
+            iconData: Icons.security_outlined,
+            onTap: () async {
+              final Uri uri = Uri.parse(Constants.PRIVACY_POLICY_URL);
+              if (!await launchUrl(uri)) throw 'Could not launch $uri';
+            },
+          ),
+          actionCard(
+            title: "Terms of use",
+            iconData: Icons.document_scanner_outlined,
+            onTap: () async {
+              final Uri uri = Uri.parse(Constants.TERMS_OF_USE_URL);
+              if (!await launchUrl(uri)) throw 'Could not launch $uri';
+            },
+          ),
+          actionCard(
+            title: "Help",
+            iconData: Icons.help_outline_rounded,
+            onTap: () async {
+              final Uri uri = Uri.parse(Constants.HELP);
+              if (!await launchUrl(uri)) throw 'Could not launch $uri';
+            },
+          ),
         ],
       ),
     );
@@ -85,6 +111,14 @@ class _DonorAccountScreenState extends State<DonorAccountScreen> {
             iconData: Icons.logout,
             bgcolor: AppColors.redLightest,
             color: AppColors.red,
+            onTap: () {
+              context.read<UserAuthProvider>().signOut();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => LoginScreen()),
+                (_) => false,
+              );
+            },
           ),
         ],
       ),
@@ -156,35 +190,43 @@ class _DonorAccountScreenState extends State<DonorAccountScreen> {
     required IconData iconData,
     Color? bgcolor,
     Color? color,
+    Function()? onTap,
   }) {
-    return Container(
-      padding: EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.grayBrightest, width: 1),
-      ),
-      width: double.infinity,
-      child: Row(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: bgcolor ?? AppColors.primaryLightestIcon,
-              borderRadius: BorderRadius.circular(16),
+    return InkWell(
+      onTap: () {
+        if (onTap != null) {
+          onTap();
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.grayBrightest, width: 1),
+        ),
+        width: double.infinity,
+        child: Row(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: bgcolor ?? AppColors.primaryLightestIcon,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(iconData, color: color ?? AppColors.primary),
+              ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Icon(iconData, color: color ?? AppColors.primary),
+            SizedBox(width: 12),
+            Text(
+              title,
+              style: TextStyle(color: color ?? AppColors.grayDarkest, fontWeight: FontWeight.bold),
             ),
-          ),
-          SizedBox(width: 12),
-          Text(
-            title,
-            style: TextStyle(color: color ?? AppColors.grayDarkest, fontWeight: FontWeight.bold),
-          ),
-          Spacer(),
-          Icon(Icons.chevron_right, color: bgcolor ?? AppColors.primaryLight),
-        ],
+            Spacer(),
+            Icon(Icons.chevron_right, color: bgcolor ?? AppColors.primaryLight),
+          ],
+        ),
       ),
     );
   }

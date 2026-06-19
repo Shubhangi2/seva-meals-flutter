@@ -29,4 +29,9 @@ class BasePrefs {
     final prefs = await getPrefs();
     prefs.clear();
   }
+
+  Future<void> remove(String key) async {
+    final prefs = await getPrefs();
+    await prefs.remove(key);
+  }
 }

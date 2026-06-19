@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:seva_meal/core/utils/user_session.dart';
 import 'package:seva_meal/db/shared_prefs.dart';
 import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/screens/dashboard_screen.dart';
@@ -21,14 +22,13 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> callAsyncTask() async {
-    UserModel? userModel = await SharedPrefs().getUserModel();
-
+    UserModel? userModel = await UserSession().user;
     if (userModel == null) {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
     } else if (userModel.role.isEmpty) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => SelectRoleScreen()),
+        MaterialPageRoute(builder: (context) => SelectRoleScreen(user: userModel)),
       );
     } else {
       Navigator.pushReplacement(

@@ -26,4 +26,12 @@ class UserAuthProvider extends ChangeNotifier {
   ) async {
     return await authDatasource.loginWithemailAndPassword(email, password);
   }
+
+  Future<void> signOut() async {
+    return await authDatasource.signOut();
+  }
+
+  Future<void> updateRoleToFirebase(String role, String uid) async {
+    return await authDatasource.updateRoleToFirebase(role, uid);
+  }
 }

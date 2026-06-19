@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:seva_meal/core/app_colors.dart';
+import 'package:seva_meal/models/post_model.dart';
 
 class DonationCard extends StatelessWidget {
-  const DonationCard({super.key});
+  final PostModel postModel;
+  const DonationCard({super.key, required this.postModel});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +31,9 @@ class DonationCard extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.asset('assets/card_image.jpg', fit: BoxFit.cover),
+                  child: postModel.pickupFoodPictureUrl.isNotEmpty
+                      ? Image.network(postModel.pickupFoodPictureUrl, fit: BoxFit.cover)
+                      : Image.asset('assets/card_image.jpg', fit: BoxFit.cover),
                 ),
               ),
               Expanded(
@@ -36,9 +41,9 @@ class DonationCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Sabji's + rice", style: TextStyle(height: 1)),
+                    Text(postModel.title, style: TextStyle(height: 1)),
                     Text(
-                      '12th Dec 2022 - Aasra shelter',
+                      '${DateFormat('dd-MM-yyyy').format(DateTime.parse(postModel.createdAt))} - ${postModel.pickupAddress}',
                       style: TextStyle(fontSize: 12, color: AppColors.grayDark, height: 1),
                     ),
                     Row(
@@ -51,7 +56,7 @@ class DonationCard extends StatelessWidget {
                             color: const Color.fromARGB(255, 218, 243, 255),
                           ),
                           child: Text(
-                            "Delivered",
+                            postModel.status,
                             style: TextStyle(color: AppColors.primary, fontSize: 12),
                           ),
                         ),
@@ -62,7 +67,7 @@ class DonationCard extends StatelessWidget {
                             color: const Color.fromARGB(255, 222, 255, 217),
                           ),
                           child: Text(
-                            "40 portions",
+                            "${postModel.quantity} portions",
                             style: TextStyle(
                               color: const Color.fromARGB(255, 17, 60, 13),
                               fontSize: 12,
