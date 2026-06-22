@@ -1,14 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:seva_meal/core/utils/user_session.dart';
 import 'package:seva_meal/datasource/auth_datasource.dart';
 import 'package:seva_meal/core/failure.dart';
+import 'package:seva_meal/models/user_model.dart';
 
 class UserAuthProvider extends ChangeNotifier {
   final AuthDatasource authDatasource;
 
   UserAuthProvider({required this.authDatasource});
-  Future<Either<Failure, UserCredential>> createUserWithEmailAndPassword(
+  Future<Either<Failure, UserModel>> createUserWithEmailAndPassword(
     String name,
     String email,
     String password,
@@ -16,11 +18,11 @@ class UserAuthProvider extends ChangeNotifier {
     return await authDatasource.createUserWithEmailAndPassword(name, email, password);
   }
 
-  Future<Either<Failure, UserCredential>> authenticateUserWithGoogle() async {
+  Future<Either<Failure, UserModel>> authenticateUserWithGoogle() async {
     return await authDatasource.authenticateUserWithGoogle();
   }
 
-  Future<Either<Failure, UserCredential>> loginWithemailAndPassword(
+  Future<Either<Failure, UserModel>> loginWithemailAndPassword(
     String email,
     String password,
   ) async {
@@ -31,7 +33,7 @@ class UserAuthProvider extends ChangeNotifier {
     return await authDatasource.signOut();
   }
 
-  Future<void> updateRoleToFirebase(String role, String uid) async {
-    return await authDatasource.updateRoleToFirebase(role, uid);
+  Future<void> saveUserDetails(UserModel user) async {
+    return await authDatasource.saveUserDetails(user);
   }
 }

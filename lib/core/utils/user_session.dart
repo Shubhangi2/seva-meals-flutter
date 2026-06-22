@@ -17,7 +17,6 @@ class UserSession {
 
   void setUser(UserModel user) {
     _user = user;
-    SharedPrefs().saveUserModel(user);
   }
 
   void clearUser() {

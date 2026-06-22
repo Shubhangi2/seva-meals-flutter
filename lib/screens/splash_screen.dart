@@ -22,7 +22,9 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> callAsyncTask() async {
-    UserModel? userModel = await UserSession().user;
+    UserModel? userModel = await SharedPrefs().getUserModel();
+    // UserModel? userModel;
+    print(userModel);
     if (userModel == null) {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
     } else if (userModel.role.isEmpty) {

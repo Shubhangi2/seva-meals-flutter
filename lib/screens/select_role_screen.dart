@@ -63,10 +63,8 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                         CustomButton(
                           text: "Donor",
                           onPressed: () async {
-                            context.read<UserAuthProvider>().updateRoleToFirebase(
-                              Constants.ROLE_DONOR,
-                              widget.user.id,
-                            );
+                            widget.user.role = Constants.ROLE_DONOR;
+                            context.read<UserAuthProvider>().saveUserDetails(widget.user);
 
                             Navigator.pushReplacement(
                               context,
@@ -127,10 +125,7 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                         CustomButton(
                           text: "Volunteer",
                           onPressed: () async {
-                            context.read<UserAuthProvider>().updateRoleToFirebase(
-                              Constants.ROLE_VOLUNTEER,
-                              widget.user.id,
-                            );
+                            context.read<UserAuthProvider>().saveUserDetails(widget.user);
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(

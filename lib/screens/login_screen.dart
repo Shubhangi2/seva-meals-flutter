@@ -55,12 +55,14 @@ class _LoginScreenState extends State<LoginScreen> {
         passwordController.text,
       );
     }
+    print(res);
     res.fold(
       (l) {
         showSnackBar(context, l.message, false);
       },
       (r) async {
         UserModel? user = await UserSession().user;
+        print(user);
         if (user == null) return;
         if (user.role.isNotEmpty) {
           Navigator.pushAndRemoveUntil(

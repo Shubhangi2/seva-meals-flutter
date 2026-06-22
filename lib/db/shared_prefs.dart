@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:seva_meal/core/constants.dart';
+import 'package:seva_meal/core/utils/user_session.dart';
 import 'package:seva_meal/db/base_prefs.dart';
 import 'package:seva_meal/models/user_model.dart';
 
@@ -14,7 +15,9 @@ class SharedPrefs extends BasePrefs {
   }
 
   Future<void> saveUserModel(UserModel userModel) async {
-    print(userModel);
+    UserSession().setUser(userModel);
+
+    print(userModel.toJson());
     await setString(Constants.USER_MODEL, jsonEncode(userModel.toJson()));
   }
 
