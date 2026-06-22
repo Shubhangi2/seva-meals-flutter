@@ -1,12 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:seva_meal/core/constants.dart';
 import 'package:seva_meal/core/failure.dart';
-import 'package:seva_meal/core/utils/user_session.dart';
 import 'package:seva_meal/db/shared_prefs.dart';
 import 'package:seva_meal/models/user_model.dart';
 

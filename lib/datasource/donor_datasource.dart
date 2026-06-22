@@ -3,7 +3,6 @@ import 'package:fpdart/fpdart.dart';
 import 'package:seva_meal/core/failure.dart';
 import 'package:seva_meal/core/utils/utility_functions.dart';
 import 'package:seva_meal/models/post_model.dart';
-import 'package:seva_meal/providers/donor_provider.dart';
 
 class DonorDatasource {
   Future<Either<Failure, String>> createPost(PostModel postModel) async {

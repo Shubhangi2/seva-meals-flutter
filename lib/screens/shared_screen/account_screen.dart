@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
 import 'package:seva_meal/core/constants.dart';
+import 'package:seva_meal/core/utils/user_session.dart';
+import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/providers/user_auth_provider.dart';
 import 'package:seva_meal/screens/login_screen.dart';
 import 'package:seva_meal/screens/shared_widgets/wave_clip_banner.dart';
@@ -16,6 +18,14 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+  UserModel? user;
+
+  @override
+  void initState() {
+    super.initState();
+    user = UserSession().user;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -148,31 +158,28 @@ class _AccountScreenState extends State<AccountScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Shubhangi Jadhav",
+                    user?.fullName ?? '',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   Row(
                     spacing: 8,
                     children: [
                       Icon(Icons.email_outlined, color: AppColors.grayDarkest, size: 20),
-                      Text(
-                        "jshubhangi958@gmail.com",
-                        style: TextStyle(color: AppColors.grayDarkest),
-                      ),
+                      Text(user?.email ?? '', style: TextStyle(color: AppColors.grayDarkest)),
                     ],
                   ),
                   Row(
                     spacing: 8,
                     children: [
                       Icon(Icons.phone_outlined, color: AppColors.grayDarkest, size: 20),
-                      Text("+91 9702212438", style: TextStyle(color: AppColors.grayDarkest)),
+                      Text(user?.mobileNo ?? '-', style: TextStyle(color: AppColors.grayDarkest)),
                     ],
                   ),
                   Row(
                     spacing: 8,
                     children: [
                       Icon(Icons.location_on_outlined, color: AppColors.grayDarkest, size: 20),
-                      Text("Airoli", style: TextStyle(color: AppColors.grayDarkest)),
+                      Text(user?.city ?? '-', style: TextStyle(color: AppColors.grayDarkest)),
                     ],
                   ),
                 ],

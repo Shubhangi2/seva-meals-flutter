@@ -125,6 +125,7 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                         CustomButton(
                           text: "Volunteer",
                           onPressed: () async {
+                            widget.user.role = Constants.ROLE_VOLUNTEER;
                             context.read<UserAuthProvider>().saveUserDetails(widget.user);
                             Navigator.pushReplacement(
                               context,
