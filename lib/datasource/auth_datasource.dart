@@ -11,6 +11,7 @@ class AuthDatasource {
 
   Future<UserModel> saveUserInPrefs({required UserCredential credentials, String? fullName}) async {
     print(credentials.user?.uid);
+    String fcmToken = await SharedPrefs().getFcmToken();
     UserModel user = UserModel(
       id: credentials.user?.uid ?? '',
       role: '',
@@ -18,6 +19,7 @@ class AuthDatasource {
       mobileNo: '',
       email: credentials.user?.email ?? '',
       city: '',
+      fcmToken: fcmToken,
     );
     await sharedPrefs.saveUserModel(user);
     return user;

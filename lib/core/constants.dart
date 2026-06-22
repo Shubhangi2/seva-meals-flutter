@@ -17,4 +17,6 @@ class Constants {
 
   static const String ROLE_VOLUNTEER = 'volunteer';
   static const String ROLE_DONOR = 'donor';
+
+  static const String FCM_TOKEN = 'fcmToken';
 }

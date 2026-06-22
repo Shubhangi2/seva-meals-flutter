@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:seva_meal/core/constants.dart';
 import 'package:seva_meal/core/utils/user_session.dart';
 import 'package:seva_meal/db/base_prefs.dart';
@@ -31,5 +32,20 @@ class SharedPrefs extends BasePrefs {
     user.role = role;
     print(user);
     await saveUserModel(user);
+  }
+
+  Future<String> getFcmToken() async {
+    String token = await getString(Constants.FCM_TOKEN);
+    if (token.isNotEmpty) {
+      return token;
+    }
+    final fbToken = await FirebaseMessaging.instance.getToken();
+    print('Device FCM Token: $fbToken');
+    SharedPrefs().saveFCMToken(fbToken ?? '');
+    return fbToken ?? '';
+  }
+
+  Future<void> saveFCMToken(String token) async {
+    await setString(Constants.FCM_TOKEN, token);
   }
 }

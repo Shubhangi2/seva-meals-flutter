@@ -1,5 +1,9 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:seva_meal/core/app_colors.dart';
+import 'package:seva_meal/db/shared_prefs.dart';
+import 'package:seva_meal/services/fcm_service.dart';
 
 class VolunteerHomeScreen extends StatefulWidget {
   const VolunteerHomeScreen({super.key});
@@ -11,6 +15,11 @@ class VolunteerHomeScreen extends StatefulWidget {
 class _VolunteerHomeScreenState extends State<VolunteerHomeScreen> {
   int _selectedFilter = 0;
   final List<String> _filters = ['All', 'Urgent', 'Cooked', 'Bakery', 'Veg only'];
+  @override
+  void initState() {
+    super.initState();
+    SharedPrefs().getFcmToken();
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
 import 'package:seva_meal/core/constants.dart';
 import 'package:seva_meal/core/utils/user_session.dart';
+import 'package:seva_meal/db/shared_prefs.dart';
 import 'package:seva_meal/models/post_model.dart';
 import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/providers/donor_provider.dart';
@@ -19,6 +20,9 @@ import 'package:seva_meal/screens/shared_widgets/loader.dart';
 import 'package:seva_meal/screens/shared_widgets/show_snackbar.dart';
 import 'package:cloudinary_url_gen/cloudinary.dart';
 import 'package:cloudinary_api/src/request/model/uploader_params.dart';
+import 'package:seva_meal/services/fcm_service.dart';
+import 'package:seva_meal/services/notification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DonorCreateScreen extends StatefulWidget {
   const DonorCreateScreen({super.key});
@@ -84,6 +88,9 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
   }
 
   Future<void> submitDetails() async {
+    String token = await SharedPrefs().getFcmToken();
+    print(token);
+    NotificationService.sendToUser(token: '', title: 'hii', body: 'i am donor');
     if (formKey.currentState!.validate()) {}
     if (selectedImageUrl == null) return showSnackBar(context, "Please upload an image", false);
     if (selectedCity == null) return showSnackBar(context, "Please select a city", false);

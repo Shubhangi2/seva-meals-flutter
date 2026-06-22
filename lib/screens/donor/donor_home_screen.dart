@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
+import 'package:seva_meal/db/shared_prefs.dart';
 import 'package:seva_meal/models/post_model.dart';
 import 'package:seva_meal/providers/donor_provider.dart';
 import 'package:seva_meal/screens/shared_widgets/custom_button.dart';
 import 'package:seva_meal/screens/shared_widgets/donation_card.dart';
 import 'package:seva_meal/screens/shared_widgets/upsidedown_clipper.dart';
 import 'package:seva_meal/screens/shared_widgets/wave_clip_banner.dart';
+import 'package:seva_meal/services/fcm_service.dart';
 
 class DonorHomeScreen extends StatefulWidget {
   const DonorHomeScreen({super.key});
@@ -31,6 +33,7 @@ class _DonorHomeScreenState extends State<DonorHomeScreen> {
         this.posts = r;
       });
     });
+    SharedPrefs().getFcmToken();
   }
 
   @override
