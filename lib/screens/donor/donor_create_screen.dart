@@ -90,7 +90,9 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
   Future<void> submitDetails() async {
     String token = await SharedPrefs().getFcmToken();
     print(token);
-    NotificationService.sendToUser(token: '', title: 'hii', body: 'i am donor');
+    NotificationService.sendToUser(token: token, title: 'hii', body: 'i am donor');
+
+    return;
     if (formKey.currentState!.validate()) {}
     if (selectedImageUrl == null) return showSnackBar(context, "Please upload an image", false);
     if (selectedCity == null) return showSnackBar(context, "Please select a city", false);

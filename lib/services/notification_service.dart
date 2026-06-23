@@ -2,10 +2,10 @@
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:seva_meal/services/accessToken.dart';
 
 class NotificationService {
-  static const String _serverKey = 'YOUR_SERVER_KEY_HERE';
-  static const String _fcmUrl = 'https://fcm.googleapis.com/fcm/send';
+  static const String _fcmUrl = 'https://fcm.googleapis.com/v1/projects/seva-meal/messages:send';
 
   // ─── SEND TO SINGLE USER ───
   static Future<void> sendToUser({
@@ -14,31 +14,35 @@ class NotificationService {
     required String body,
     Map<String, String>? data,
   }) async {
+    final accessToken = await AccessToken.getAccessToken();
+
     try {
       final response = await http.post(
         Uri.parse(_fcmUrl),
-        headers: {'Content-Type': 'application/json', 'Authorization': 'key=$_serverKey'},
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'},
         body: jsonEncode({
-          'to': token,
-          'priority': 'high',
-          'notification': {'title': title, 'body': body, 'sound': 'default'},
-          'data': data ?? {},
+          'message': {
+            // ✅ v1 wrapper
+            'token': token, // ✅ 'token' not 'to'
+            'notification': {'title': title, 'body': body}, // ✅ no 'sound' here
+            'data': data ?? {},
+            'android': {'priority': 'HIGH'}, // ✅ priority goes here
+          },
         }),
       );
 
+      print(response.body);
+
       if (response.statusCode == 200) {
-        print('Notification sent successfully');
+        print('✅ Notification sent successfully');
       } else {
-        print('Failed: ${response.body}');
+        print('❌ Failed: ${response.body}');
       }
     } catch (e) {
-      print('Error sending notification: $e');
+      print('❌ Error sending notification: $e');
     }
   }
 
-  // ─── DONOR NOTIFICATIONS ───
-
-  // volunteer accepted donation
   static Future<void> notifyVolunteerAssigned({
     required String donorToken,
     required String volunteerName,
@@ -135,6 +139,7 @@ class NotificationService {
     Map<String, String>? data,
   }) async {
     if (tokens.isEmpty) return;
+    String token = await AccessToken.getAccessToken();
 
     // FCM allows max 1000 tokens per request
     // split into chunks of 1000 just to be safe
@@ -143,10 +148,10 @@ class NotificationService {
     for (final chunk in chunks) {
       try {
         final response = await http.post(
-          Uri.parse('https://fcm.googleapis.com/fcm/send'),
-          headers: {'Content-Type': 'application/json', 'Authorization': 'key=$_serverKey'},
+          Uri.parse(_fcmUrl),
+          headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
           body: jsonEncode({
-            'registration_ids': chunk, // use this instead of 'to'
+            'registration_ids': chunk,
             'priority': 'high',
             'notification': {'title': title, 'body': body, 'sound': 'default'},
             'data': data ?? {},
