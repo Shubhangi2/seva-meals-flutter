@@ -35,7 +35,6 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController foodTypeController = TextEditingController();
   final TextEditingController quantityController = TextEditingController();
   final TextEditingController pickupAddressController = TextEditingController();
   bool isLoading = false;
@@ -43,6 +42,7 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
   String? selectedImageUrl;
   String? selectedRegion;
   String? selectedCity;
+  String foodType = '';
 
   List<UserModel> volunteers = [];
 
@@ -58,7 +58,6 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     callAsyncTask();
   }
@@ -133,7 +132,7 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
     PostModel postModel = PostModel(
       title: titleController.text,
       description: descriptionController.text,
-      foodType: foodTypeController.text,
+      foodType: foodType,
       quantity: quantityController.text,
       city: selectedCity ?? '',
       region: selectedRegion ?? '',
@@ -157,7 +156,7 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
         selectedRegion = null;
         titleController.clear();
         descriptionController.clear();
-        foodTypeController.clear();
+        foodType = '';
         quantityController.clear();
         pickupAddressController.clear();
       });
@@ -260,7 +259,7 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
                           icon: Icons.food_bank,
                           onSelected: (value) {
                             setState(() {
-                              foodTypeController.text = value;
+                              foodType = value;
                             });
                           },
                           itemToString: (item) => item,

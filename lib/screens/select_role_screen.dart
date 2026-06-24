@@ -7,6 +7,7 @@ import 'package:seva_meal/db/shared_prefs.dart';
 import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/providers/user_auth_provider.dart';
 import 'package:seva_meal/screens/dashboard_screen.dart';
+import 'package:seva_meal/screens/shared_screen/select_city_screen.dart';
 
 import 'package:seva_meal/screens/shared_widgets/custom_button.dart';
 
@@ -19,6 +20,21 @@ class SelectRoleScreen extends StatefulWidget {
 }
 
 class _SelectRoleScreenState extends State<SelectRoleScreen> {
+  void navigateToNextScreen(BuildContext context) {
+    context.read<UserAuthProvider>().saveUserDetails(widget.user);
+    if (widget.user.city.isEmpty || widget.user.region.isEmpty) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SelectCityScreen(user: widget.user)),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => DashboardScreen(role: widget.user.role)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -64,14 +80,7 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                           text: "Donor",
                           onPressed: () async {
                             widget.user.role = Constants.ROLE_DONOR;
-                            context.read<UserAuthProvider>().saveUserDetails(widget.user);
-
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => DashboardScreen(role: Constants.ROLE_DONOR),
-                              ),
-                            );
+                            navigateToNextScreen(context);
                           },
                           height: 42,
                         ),
@@ -81,7 +90,7 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                 ),
 
                 Positioned(
-                  left: -122,
+                  left: -140,
                   child: ClipOval(
                     child: Image.asset(
                       'assets/donor.jpg',
@@ -126,14 +135,7 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                           text: "Volunteer",
                           onPressed: () async {
                             widget.user.role = Constants.ROLE_VOLUNTEER;
-                            context.read<UserAuthProvider>().saveUserDetails(widget.user);
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    DashboardScreen(role: Constants.ROLE_VOLUNTEER),
-                              ),
-                            );
+                            navigateToNextScreen(context);
                           },
                           height: 42,
                         ),
@@ -143,7 +145,7 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                 ),
 
                 Positioned(
-                  right: -122,
+                  right: -140,
                   child: ClipOval(
                     child: Image.asset(
                       'assets/volunteer.jpg',

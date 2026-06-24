@@ -5,6 +5,7 @@ import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/screens/dashboard_screen.dart';
 import 'package:seva_meal/screens/login_screen.dart';
 import 'package:seva_meal/screens/select_role_screen.dart';
+import 'package:seva_meal/screens/shared_screen/select_city_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -31,6 +32,11 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => SelectRoleScreen(user: userModel)),
+      );
+    } else if (userModel.city.isEmpty || userModel.region.isEmpty) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SelectCityScreen(user: userModel)),
       );
     } else {
       Navigator.pushReplacement(

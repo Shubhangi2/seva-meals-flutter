@@ -4,9 +4,9 @@ class UserModel {
   final String fullName;
   final String mobileNo;
   final String email;
-  final String city;
   final String fcmToken;
-  final String region;
+  String city;
+  String region;
 
   UserModel({
     required this.id,

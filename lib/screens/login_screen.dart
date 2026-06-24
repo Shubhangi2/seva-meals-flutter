@@ -41,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
     await GoogleSignIn.instance.initialize();
   }
 
-  Future<void> loginUser(bool isGoogle) async {
+  Future<void> loginUser(bool isGoogle, BuildContext context) async {
     final res;
     setState(() {
       isLoading = true;
@@ -148,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             CustomButton(
                               text: "Login",
                               onPressed: () {
-                                loginUser(false);
+                                loginUser(false, context);
                               },
                             ),
                             const SizedBox(height: 24),
@@ -156,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 24),
                             InkWell(
                               onTap: () {
-                                loginUser(true);
+                                loginUser(true, context);
                               },
                               child: GoogleWidget.GoogleWidget(),
                             ),
