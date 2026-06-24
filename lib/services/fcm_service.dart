@@ -49,7 +49,7 @@ class FCMService {
 
   Future<void> _setupLocalNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@mipmap/seva_meal_icon');
 
     const DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
       requestSoundPermission: true,

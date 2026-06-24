@@ -3,7 +3,7 @@
     <application
         android:label="seva_meal"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/seva_meal_icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"

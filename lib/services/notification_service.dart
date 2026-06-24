@@ -22,11 +22,10 @@ class NotificationService {
         headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'},
         body: jsonEncode({
           'message': {
-            // ✅ v1 wrapper
-            'token': token, // ✅ 'token' not 'to'
-            'notification': {'title': title, 'body': body}, // ✅ no 'sound' here
+            'token': token,
+            'notification': {'title': title, 'body': body},
             'data': data ?? {},
-            'android': {'priority': 'HIGH'}, // ✅ priority goes here
+            'android': {'priority': 'HIGH'},
           },
         }),
       );
