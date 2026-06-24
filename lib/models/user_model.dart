@@ -6,6 +6,7 @@ class UserModel {
   final String email;
   final String city;
   final String fcmToken;
+  final String region;
 
   UserModel({
     required this.id,
@@ -15,6 +16,7 @@ class UserModel {
     required this.email,
     required this.city,
     required this.fcmToken,
+    required this.region,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class UserModel {
       email: json['email'] ?? '',
       city: json['city'] ?? '',
       fcmToken: json['fcmToken'] ?? '',
+      region: json['region'] ?? '',
     );
   }
 
@@ -38,6 +41,7 @@ class UserModel {
       'email': email,
       'city': city,
       'fcmToken': fcmToken,
+      'region': region,
     };
   }
 }

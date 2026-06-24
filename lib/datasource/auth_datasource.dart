@@ -20,6 +20,7 @@ class AuthDatasource {
       email: credentials.user?.email ?? '',
       city: '',
       fcmToken: fcmToken,
+      region: '',
     );
     await sharedPrefs.saveUserModel(user);
     return user;

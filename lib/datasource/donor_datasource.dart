@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:seva_meal/core/constants.dart';
 import 'package:seva_meal/core/failure.dart';
 import 'package:seva_meal/core/utils/utility_functions.dart';
 import 'package:seva_meal/models/post_model.dart';
+import 'package:seva_meal/models/user_model.dart';
 
 class DonorDatasource {
   Future<Either<Failure, String>> createPost(PostModel postModel) async {
@@ -26,6 +28,22 @@ class DonorDatasource {
     } catch (e) {
       print(e);
       return left(Failure("Failed to get posts"));
+    }
+  }
+
+  Future<Either<Failure, List<UserModel>>> getNearbyVolunteers(String region) async {
+    final db = FirebaseFirestore.instance;
+    try {
+      final docs = await db
+          .collection("users")
+          .where("role", isEqualTo: Constants.ROLE_VOLUNTEER)
+          .where("region", isEqualTo: region)
+          .get();
+      List<UserModel> volunteers = docs.docs.map((e) => UserModel.fromJson(e.data())).toList();
+      return right(volunteers);
+    } catch (e) {
+      print(e);
+      return left(Failure("Failed to get volunteers"));
     }
   }
 }

@@ -44,6 +44,8 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
   String? selectedRegion;
   String? selectedCity;
 
+  List<UserModel> volunteers = [];
+
   List<String> dropdownList = [
     "Cooked",
     "Raw Vegetables",
@@ -53,6 +55,25 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
     "Packaged",
     "other",
   ];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    callAsyncTask();
+  }
+
+  void callAsyncTask() async {
+    UserModel? user = UserSession().user;
+    if (user == null) return;
+
+    final res = await context.read<DonorProvider>().getNearbyVolunteers("Airoli");
+    res.fold((l) => print(l.message), (r) {
+      setState(() {
+        volunteers = r;
+      });
+    });
+  }
 
   void upload(File file) async {
     final cloudinary = CloudinaryPublic('detlktkvo', 'ml_default', cache: false);
@@ -87,11 +108,19 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
     }
   }
 
-  Future<void> submitDetails() async {
-    String token = await SharedPrefs().getFcmToken();
-    print(token);
-    NotificationService.sendToUser(token: token, title: 'hii', body: 'i am donor');
+  void sendNotification() {
+    volunteers.forEach((element) {
+      print(element.fcmToken);
+      NotificationService.sendToUser(
+        token: element.fcmToken,
+        title: 'I am donor',
+        body: 'Your are ${element.fullName} volunteer.',
+      );
+    });
+  }
 
+  Future<void> submitDetails() async {
+    sendNotification();
     return;
     if (formKey.currentState!.validate()) {}
     if (selectedImageUrl == null) return showSnackBar(context, "Please upload an image", false);
