@@ -66,11 +66,9 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
     UserModel? user = UserSession().user;
     if (user == null) return;
 
-    final res = await context.read<DonorProvider>().getNearbyVolunteers("Airoli");
+    final res = await context.read<DonorProvider>().getNearbyVolunteers(user.region);
     res.fold((l) => print(l.message), (r) {
-      setState(() {
-        volunteers = r;
-      });
+      volunteers = r;
     });
   }
 
@@ -119,8 +117,6 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
   }
 
   Future<void> submitDetails() async {
-    sendNotification();
-    return;
     if (formKey.currentState!.validate()) {}
     if (selectedImageUrl == null) return showSnackBar(context, "Please upload an image", false);
     if (selectedCity == null) return showSnackBar(context, "Please select a city", false);
@@ -140,6 +136,7 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
       pickupAddress: pickupAddressController.text,
       pickupFoodPictureUrl: selectedImageUrl ?? '',
       status: Constants.STATUS_PENDING,
+      isActive: true,
       createdAt: DateTime.now().toString(),
       updatedAt: DateTime.now().toString(),
     );
@@ -163,6 +160,8 @@ class _DonorCreateScreenState extends State<DonorCreateScreen> {
       showSnackBar(context, r, true);
     });
     setState(() => isLoading = false);
+
+    sendNotification();
   }
 
   @override
