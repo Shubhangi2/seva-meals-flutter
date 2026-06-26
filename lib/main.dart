@@ -36,7 +36,6 @@ class MyApp extends StatelessWidget {
       title: 'Seva Meals',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primaryColor: AppColors.primary, scaffoldBackgroundColor: Colors.white),
-      // home: const LoginScreen(),
       home: const SplashScreen(),
     );
   }

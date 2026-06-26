@@ -13,6 +13,7 @@ class PostModel {
   final String? postDriveFoodPictureUrl;
   final String? volunteerId;
   final String status;
+  final bool isActive;
   final String createdAt;
   final String updatedAt;
 
@@ -27,6 +28,7 @@ class PostModel {
     required this.region,
     required this.pickupAddress,
     this.donationAddress,
+    required this.isActive,
     required this.pickupFoodPictureUrl,
     this.postDriveFoodPictureUrl,
     this.volunteerId,
@@ -44,6 +46,7 @@ class PostModel {
       foodType: json['foodType'] ?? '',
       quantity: json['quantity'] ?? '',
       city: json['city'] ?? '',
+      isActive: json['isActive'] ?? false,
       region: json['region'] ?? '',
       pickupAddress: json['pickupAddress'] ?? '',
       donationAddress: json['donationAddress'] ?? '',
@@ -66,6 +69,7 @@ class PostModel {
       'quantity': quantity,
       'city': city,
       'region': region,
+      'isActive': isActive,
       'pickupAddress': pickupAddress,
       'donationAddress': donationAddress,
       'pickupFoodPictureUrl': pickupFoodPictureUrl,

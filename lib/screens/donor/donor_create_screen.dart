@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:cloudinary_api/uploader/cloudinary_uploader.dart';
-import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
 import 'package:seva_meal/core/constants.dart';
 import 'package:seva_meal/core/utils/user_session.dart';
-import 'package:seva_meal/db/shared_prefs.dart';
 import 'package:seva_meal/models/post_model.dart';
 import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/providers/donor_provider.dart';
@@ -18,11 +15,8 @@ import 'package:seva_meal/screens/shared_widgets/custom_dropdown_widget.dart';
 import 'package:seva_meal/screens/shared_widgets/custom_text_form_field.dart';
 import 'package:seva_meal/screens/shared_widgets/loader.dart';
 import 'package:seva_meal/screens/shared_widgets/show_snackbar.dart';
-import 'package:cloudinary_url_gen/cloudinary.dart';
-import 'package:cloudinary_api/src/request/model/uploader_params.dart';
-import 'package:seva_meal/services/fcm_service.dart';
 import 'package:seva_meal/services/notification_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloudinary_public/cloudinary_public.dart';
 
 class DonorCreateScreen extends StatefulWidget {
   const DonorCreateScreen({super.key});
@@ -32,314 +26,653 @@ class DonorCreateScreen extends StatefulWidget {
 }
 
 class _DonorCreateScreenState extends State<DonorCreateScreen> {
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController quantityController = TextEditingController();
-  final TextEditingController pickupAddressController = TextEditingController();
-  bool isLoading = false;
-  File? capturedImage;
-  String? selectedImageUrl;
-  String? selectedRegion;
-  String? selectedCity;
-  String foodType = '';
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _pickupAddressController = TextEditingController();
+  final TextEditingController _instructionsController = TextEditingController();
 
-  List<UserModel> volunteers = [];
+  bool _isLoading = false;
+  bool _isUploading = false;
+  bool _isVeg = true;
+  File? _capturedImage;
+  String? _selectedImageUrl;
+  String? _selectedRegion;
+  String? _selectedCity;
+  String? _selectedFoodType;
+  String? _selectedExpiry;
+  List<UserModel> _volunteers = [];
 
-  List<String> dropdownList = [
-    "Cooked",
+  final List<String> _foodTypes = [
+    "Cooked Food",
     "Raw Vegetables",
     "Bakery",
     "Fruits",
     "Dairy",
     "Packaged",
-    "other",
+    "Other",
   ];
+
+  final List<String> _expiryOptions = ["1 hour", "2 hours", "4 hours", "6 hours", "Next morning"];
 
   @override
   void initState() {
     super.initState();
-    callAsyncTask();
+    _loadVolunteers();
   }
 
-  void callAsyncTask() async {
-    UserModel? user = UserSession().user;
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _quantityController.dispose();
+    _pickupAddressController.dispose();
+    _instructionsController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadVolunteers() async {
+    final user = UserSession().user;
     if (user == null) return;
-
     final res = await context.read<DonorProvider>().getNearbyVolunteers(user.region);
-    res.fold((l) => print(l.message), (r) {
-      volunteers = r;
-    });
+    res.fold((l) => print(l.message), (r) => setState(() => _volunteers = r));
   }
 
-  void upload(File file) async {
-    final cloudinary = CloudinaryPublic('detlktkvo', 'ml_default', cache: false);
-
-    final response = await cloudinary.uploadFile(
-      CloudinaryFile.fromFile(
-        file.path,
-        resourceType: CloudinaryResourceType.Image,
-        folder: "sevameal",
-      ),
-    );
-    print("Upload success: $response");
-    setState(() {
-      capturedImage = file;
-      selectedImageUrl = response.secureUrl;
-    });
+  Future<void> _uploadImage(File file) async {
+    setState(() => _isUploading = true);
+    try {
+      final cloudinary = CloudinaryPublic('detlktkvo', 'ml_default', cache: false);
+      final response = await cloudinary.uploadFile(
+        CloudinaryFile.fromFile(
+          file.path,
+          resourceType: CloudinaryResourceType.Image,
+          folder: "sevameal",
+        ),
+      );
+      setState(() {
+        _capturedImage = file;
+        _selectedImageUrl = response.secureUrl;
+      });
+    } catch (e) {
+      showSnackBar(context, "Image upload failed. Try again.", false);
+    } finally {
+      setState(() => _isUploading = false);
+    }
   }
 
-  Future<void> captureImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? photo = await picker.pickImage(
-      source: ImageSource.camera,
+  Future<void> _pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final photo = await picker.pickImage(
+      source: source,
       maxWidth: 400,
       maxHeight: 600,
       imageQuality: 70,
     );
-
     if (photo != null) {
-      upload(File(photo.path));
-    } else {
-      showSnackBar(context, "Image not captured", false);
+      await _uploadImage(File(photo.path));
     }
   }
 
-  void sendNotification() {
-    volunteers.forEach((element) {
-      print(element.fcmToken);
-      NotificationService.sendToUser(
-        token: element.fcmToken,
-        title: 'I am donor',
-        body: 'Your are ${element.fullName} volunteer.',
-      );
-    });
+  void _showImageSourceSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Food Photo',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Help volunteers identify your food quickly',
+                style: TextStyle(fontSize: 12, color: AppColors.primaryLight),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _imageSourceTile(
+                      icon: Icons.camera_alt_rounded,
+                      label: 'Camera',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _pickImage(ImageSource.camera);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _imageSourceTile(
+                      icon: Icons.photo_library_rounded,
+                      label: 'Gallery',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _pickImage(ImageSource.gallery);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
-  Future<void> submitDetails() async {
-    if (formKey.currentState!.validate()) {}
-    if (selectedImageUrl == null) return showSnackBar(context, "Please upload an image", false);
-    if (selectedCity == null) return showSnackBar(context, "Please select a city", false);
-    if (selectedRegion == null) return showSnackBar(context, "Please select a region", false);
+  Widget _imageSourceTile({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: AppColors.bgColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.primaryLightest),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: AppColors.primary, size: 28),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.primary),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-    UserModel? user = UserSession().user;
-    if (user == null) return showSnackBar(context, "Failed to get user id", false);
+  void _sendNotificationsToVolunteers() {
+    for (final volunteer in _volunteers) {
+      NotificationService.sendToUser(
+        token: volunteer.fcmToken,
+        title: '🍱 New donation nearby!',
+        body:
+            '${_titleController.text} available in ${"$_selectedRegion, $_selectedCity"}. Pick it up before it expires!',
+        data: {'type': 'new_donation'},
+      );
+    }
+  }
 
-    PostModel postModel = PostModel(
-      title: titleController.text,
-      description: descriptionController.text,
-      foodType: foodType,
-      quantity: quantityController.text,
-      city: selectedCity ?? '',
-      region: selectedRegion ?? '',
+  Future<void> _submitPost() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    if (_selectedFoodType == null) {
+      return showSnackBar(context, "Please select food type", false);
+    }
+    if (_selectedCity == null) {
+      return showSnackBar(context, "Please select a city", false);
+    }
+    if (_selectedRegion == null) {
+      return showSnackBar(context, "Please select a region", false);
+    }
+    if (_selectedExpiry == null) {
+      return showSnackBar(context, "Please select expiry time", false);
+    }
+    if (_selectedImageUrl == null) {
+      return showSnackBar(context, "Please upload a food photo", false);
+    }
+
+    final user = UserSession().user;
+    if (user == null) {
+      return showSnackBar(context, "Session expired. Please login again.", false);
+    }
+
+    final post = PostModel(
+      title: _titleController.text.trim(),
+      description: _descriptionController.text.trim(),
+      foodType: _selectedFoodType ?? '',
+      quantity: _quantityController.text.trim(),
+      city: _selectedCity ?? '',
+      region: _selectedRegion ?? '',
       donorId: user.id,
-      pickupAddress: pickupAddressController.text,
-      pickupFoodPictureUrl: selectedImageUrl ?? '',
+      pickupAddress: _pickupAddressController.text.trim(),
+      pickupFoodPictureUrl: _selectedImageUrl ?? '',
       status: Constants.STATUS_PENDING,
       isActive: true,
       createdAt: DateTime.now().toString(),
       updatedAt: DateTime.now().toString(),
     );
 
-    setState(() => isLoading = true);
+    setState(() => _isLoading = true);
 
-    final res = await context.read<DonorProvider>().createPost(postModel);
+    final res = await context.read<DonorProvider>().createPost(post);
 
     res.fold((l) => showSnackBar(context, l.message, false), (r) {
-      setState(() {
-        capturedImage = null;
-        selectedImageUrl = null;
-        selectedCity = null;
-        selectedRegion = null;
-        titleController.clear();
-        descriptionController.clear();
-        foodType = '';
-        quantityController.clear();
-        pickupAddressController.clear();
-      });
+      _resetForm();
       showSnackBar(context, r, true);
+      _sendNotificationsToVolunteers();
     });
-    setState(() => isLoading = false);
 
-    sendNotification();
+    setState(() => _isLoading = false);
+  }
+
+  void _resetForm() {
+    setState(() {
+      _capturedImage = null;
+      _selectedImageUrl = null;
+      _selectedCity = null;
+      _selectedRegion = null;
+      _selectedFoodType = null;
+      _selectedExpiry = null;
+      _isVeg = true;
+    });
+    _titleController.clear();
+    _descriptionController.clear();
+    _quantityController.clear();
+    _pickupAddressController.clear();
+    _instructionsController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Stack(
+    return Scaffold(
+      backgroundColor: AppColors.bgColor,
+      body: SafeArea(
+        child: Column(
           children: [
-            Container(
-              color: AppColors.primary,
-              width: double.infinity,
-              child: Image.asset(
-                'assets/create_post_bg.jpg',
-                height: 180,
-                fit: BoxFit.cover,
-                opacity: const AlwaysStoppedAnimation(.2),
-              ),
-            ),
-            SizedBox(
-              height: 180,
-              width: double.infinity,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "Create Donation Post",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 30),
-                ],
-              ),
-            ),
-            SingleChildScrollView(
-              child: Container(
-                margin: EdgeInsets.only(top: 150),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      spacing: 16,
-                      children: [
-                        CustomTextFormField(
-                          controller: titleController,
-                          label: "Food Title",
-                          hintText: "Enter food title",
-                          inputFormatters: [LengthLimitingTextInputFormatter(100)],
-                          onValidate: (value) {
-                            if (value.isEmpty) {
-                              return "Please enter a title";
-                            }
-                            return null;
-                          },
-                          textInputType: TextInputType.text,
-                        ),
-                        CustomTextFormField(
-                          controller: descriptionController,
-                          label: "Description",
-                          hintText: "Daal rice",
-                          inputFormatters: [LengthLimitingTextInputFormatter(400)],
-                          onValidate: (value) {
-                            if (value.isEmpty) {
-                              return "Please enter a description";
-                            }
-                            return null;
-                          },
-                          textInputType: TextInputType.text,
-                        ),
-                        CustomTextFormField(
-                          controller: quantityController,
-                          label: "Quantity",
-                          hintText: "Enter quantity",
-                          inputFormatters: [LengthLimitingTextInputFormatter(8)],
-                          onValidate: (value) {
-                            if (value.isEmpty) {
-                              return "Please enter a quantity";
-                            }
-                            return null;
-                          },
-                          textInputType: TextInputType.number,
-                        ),
-                        CustomDropdownWidget(
-                          dropdownList: dropdownList,
-                          hintText: "Select food type",
-                          icon: Icons.food_bank,
-                          onSelected: (value) {
-                            setState(() {
-                              foodType = value;
-                            });
-                          },
-                          itemToString: (item) => item,
-                        ),
+            _buildHeader(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ── SECTION: Food Details ──
+                      _buildSectionLabel('Food Details', Icons.fastfood_rounded),
+                      const SizedBox(height: 12),
+                      CustomTextFormField(
+                        controller: _titleController,
+                        label: "Food Title",
+                        hintText: "e.g. Biryani, Dal Rice + Sabzi",
+                        inputFormatters: [LengthLimitingTextInputFormatter(100)],
+                        onValidate: (value) => value.isEmpty ? "Please enter a title" : null,
+                        textInputType: TextInputType.text,
+                      ),
+                      const SizedBox(height: 12),
+                      CustomTextFormField(
+                        controller: _descriptionController,
+                        label: "Description",
+                        hintText: "Ingredients, allergens, packaging notes...",
+                        inputFormatters: [LengthLimitingTextInputFormatter(400)],
+                        onValidate: (value) => value.isEmpty ? "Please enter a description" : null,
+                        textInputType: TextInputType.text,
+                      ),
+                      const SizedBox(height: 12),
 
-                        CustomDropdownWidget(
-                          dropdownList: Constants.regionList.keys.toList(),
-                          hintText: 'Select city',
-                          icon: Icons.location_city,
-                          onSelected: (value) {
-                            setState(() {
-                              selectedCity = value;
-                            });
-                          },
-                          itemToString: (item) => item,
-                        ),
-                        CustomDropdownWidget(
-                          dropdownList: selectedCity == null
-                              ? []
-                              : Constants.regionList[selectedCity]!,
-                          hintText: 'Select region',
-                          icon: Icons.location_city,
-                          onSelected: (value) {
-                            setState(() {
-                              selectedRegion = value;
-                            });
-                          },
-                          itemToString: (item) => item,
-                        ),
-                        CustomTextFormField(
-                          controller: pickupAddressController,
-                          label: "Pickup address",
-                          hintText: "Enter pickup address",
-                          inputFormatters: [],
-                          onValidate: (value) {},
-                          textInputType: TextInputType.text,
-                        ),
-                        InkWell(
-                          onTap: () {
-                            captureImage();
-                          },
-                          child: Container(
-                            height: 150,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppColors.grayLight, width: 1.0),
+                      // food type + quantity row
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: CustomDropdownWidget(
+                              dropdownList: _foodTypes,
+                              hintText: "Food type",
+                              icon: Icons.category_rounded,
+                              onSelected: (value) => setState(() => _selectedFoodType = value),
+                              itemToString: (item) => item,
                             ),
-                            child: capturedImage != null
-                                ? Image.file(capturedImage!, fit: BoxFit.cover)
-                                : Column(
-                                    spacing: 8,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.upload, size: 50, color: AppColors.grayLight),
-                                      Text(
-                                        "Upload Image",
-                                        style: TextStyle(color: AppColors.grayDark),
-                                      ),
-                                    ],
-                                  ),
                           ),
-                        ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            flex: 2,
+                            child: CustomTextFormField(
+                              controller: _quantityController,
+                              label: "Qty (portions)",
+                              hintText: "e.g. 40",
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(5),
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              onValidate: (value) => value.isEmpty ? "Required" : null,
+                              textInputType: TextInputType.number,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
 
-                        isLoading
-                            ? Loader()
-                            : CustomButton(
-                                text: "Create Post",
-                                onPressed: () {
-                                  submitDetails();
-                                },
+                      // veg / non-veg toggle
+                      _buildVegToggle(),
+                      const SizedBox(height: 20),
+
+                      // ── SECTION: Expiry ──
+                      _buildSectionLabel('Expiry Time', Icons.access_time_rounded),
+                      const SizedBox(height: 12),
+                      CustomDropdownWidget(
+                        dropdownList: _expiryOptions,
+                        hintText: "How long is the food good for?",
+                        icon: Icons.timer_rounded,
+                        onSelected: (value) => setState(() => _selectedExpiry = value),
+                        itemToString: (item) => item,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // ── SECTION: Location ──
+                      _buildSectionLabel('Pickup Location', Icons.location_on_rounded),
+                      const SizedBox(height: 12),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: CustomDropdownWidget(
+                              dropdownList: Constants.regionList.keys.toList(),
+                              hintText: 'City',
+                              icon: Icons.location_city_rounded,
+                              onSelected: (value) => setState(() {
+                                _selectedCity = value;
+                                _selectedRegion = null;
+                              }),
+                              itemToString: (item) => item,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: AnimatedOpacity(
+                              opacity: _selectedCity == null ? 0.4 : 1.0,
+                              duration: const Duration(milliseconds: 200),
+                              child: IgnorePointer(
+                                ignoring: _selectedCity == null,
+                                child: CustomDropdownWidget(
+                                  dropdownList: _selectedCity == null
+                                      ? []
+                                      : Constants.regionList[_selectedCity]!,
+                                  hintText: 'Area',
+                                  icon: Icons.map_rounded,
+                                  onSelected: (value) => setState(() => _selectedRegion = value),
+                                  itemToString: (item) => item,
+                                ),
                               ),
-                      ],
-                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      CustomTextFormField(
+                        controller: _pickupAddressController,
+                        label: "Full Pickup Address",
+                        hintText: "Building name, street, landmark",
+                        inputFormatters: [],
+                        onValidate: (value) => value.isEmpty ? "Please enter pickup address" : null,
+                        textInputType: TextInputType.streetAddress,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // ── SECTION: Special instructions ──
+                      _buildSectionLabel('Special Instructions', Icons.info_outline_rounded),
+                      const SizedBox(height: 12),
+                      CustomTextFormField(
+                        controller: _instructionsController,
+                        label: "Instructions (optional)",
+                        hintText: "e.g. Bring containers, call on arrival, gate code",
+                        inputFormatters: [LengthLimitingTextInputFormatter(200)],
+                        onValidate: (_) => null,
+                        textInputType: TextInputType.text,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // ── SECTION: Food Photo ──
+                      _buildSectionLabel('Food Photo', Icons.photo_camera_rounded),
+                      const SizedBox(height: 12),
+                      _buildImagePicker(),
+                      const SizedBox(height: 20),
+
+                      // ── SAFETY CONSENT ──
+                      _buildSafetyConsent(),
+                      const SizedBox(height: 24),
+
+                      // ── SUBMIT ──
+                      _isLoading
+                          ? const Loader()
+                          : CustomButton(text: "Post Donation", onPressed: _submitPost),
+                      const SizedBox(height: 20),
+                    ],
                   ),
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ─── HEADER ───
+  Widget _buildHeader() {
+    return Container(
+      color: AppColors.primary,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Icon(Icons.arrow_back_rounded, color: AppColors.primaryLightest),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Post Donation',
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+              Text(
+                'Fill details — volunteers will be notified',
+                style: TextStyle(color: AppColors.primaryLightest.withOpacity(0.7), fontSize: 12),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── SECTION LABEL ───
+  Widget _buildSectionLabel(String title, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, size: 15, color: AppColors.primaryLight),
+        const SizedBox(width: 6),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primaryDeep,
+            letterSpacing: 0.3,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ─── VEG TOGGLE ───
+  Widget _buildVegToggle() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primaryLightest),
+      ),
+      child: Row(
+        children: [
+          Expanded(child: _vegOption(true, '🌿 Vegetarian')),
+          Expanded(child: _vegOption(false, '🍗 Non-Veg')),
+        ],
+      ),
+    );
+  }
+
+  Widget _vegOption(bool isVeg, String label) {
+    final selected = _isVeg == isVeg;
+    return GestureDetector(
+      onTap: () => setState(() => _isVeg = isVeg),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: selected ? Colors.white : AppColors.primaryLight,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── IMAGE PICKER ───
+  Widget _buildImagePicker() {
+    return GestureDetector(
+      onTap: _showImageSourceSheet,
+      child: Container(
+        height: 160,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: _selectedImageUrl != null ? AppColors.primaryLight : AppColors.primaryLightest,
+            width: _selectedImageUrl != null ? 1.5 : 1,
+          ),
+        ),
+        child: _isUploading
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: AppColors.primaryLight, strokeWidth: 2),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Uploading...',
+                    style: TextStyle(fontSize: 12, color: AppColors.primaryLight),
+                  ),
+                ],
+              )
+            : _capturedImage != null
+            ? Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(13),
+                    child: Image.file(_capturedImage!, fit: BoxFit.cover),
+                  ),
+                  // change photo button
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.85),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.edit_rounded, color: Colors.white, size: 12),
+                          SizedBox(width: 4),
+                          Text(
+                            'Change',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLightest,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.add_photo_alternate_rounded,
+                      color: AppColors.primaryLight,
+                      size: 26,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Add food photo',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primaryDeep,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Helps volunteers identify food quickly',
+                    style: TextStyle(fontSize: 11, color: AppColors.primaryLight),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  // ─── SAFETY CONSENT ───
+  Widget _buildSafetyConsent() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8E1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFFFE082)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('⚠️', style: TextStyle(fontSize: 16)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'By posting this donation I confirm that the food is safe for consumption, properly stored, and accurately described.',
+              style: TextStyle(fontSize: 12, color: const Color(0xFF5D4037), height: 1.5),
+            ),
+          ),
+        ],
       ),
     );
   }

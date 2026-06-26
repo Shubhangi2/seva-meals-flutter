@@ -66,7 +66,6 @@ class _SelectCityScreenState extends State<SelectCityScreen> {
 
                   const SizedBox(height: 20),
 
-                  // city label
                   _buildLabel('City', Icons.location_city_rounded),
                   const SizedBox(height: 8),
                   CustomDropdownWidget(
@@ -76,7 +75,7 @@ class _SelectCityScreenState extends State<SelectCityScreen> {
                     onSelected: (value) {
                       setState(() {
                         selectedCity = value;
-                        selectedRegion = null; // reset region
+                        selectedRegion = null;
                       });
                     },
                     itemToString: (item) => item,
@@ -84,11 +83,9 @@ class _SelectCityScreenState extends State<SelectCityScreen> {
 
                   const SizedBox(height: 20),
 
-                  // region label
                   _buildLabel('Area / Region', Icons.map_rounded),
                   const SizedBox(height: 8),
 
-                  // region dropdown — grayed out until city selected
                   AnimatedOpacity(
                     opacity: selectedCity == null ? 0.4 : 1.0,
                     duration: const Duration(milliseconds: 300),
@@ -147,7 +144,6 @@ class _SelectCityScreenState extends State<SelectCityScreen> {
     );
   }
 
-  // ─── LABEL ROW ───
   Widget _buildLabel(String text, IconData icon) {
     return Row(
       children: [
@@ -161,7 +157,6 @@ class _SelectCityScreenState extends State<SelectCityScreen> {
     );
   }
 
-  // ─── SUMMARY CARD ───
   Widget _buildSummaryCard() {
     return Container(
       padding: const EdgeInsets.all(12),

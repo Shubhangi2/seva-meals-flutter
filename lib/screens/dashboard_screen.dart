@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:seva_meal/core/app_colors.dart';
 import 'package:seva_meal/core/constants.dart';
+import 'package:seva_meal/screens/donor/donor_notification_screen.dart';
 import 'package:seva_meal/screens/shared_screen/account_screen.dart';
 import 'package:seva_meal/screens/donor/donor_create_screen.dart';
 import 'package:seva_meal/screens/shared_screen/history_screen.dart';
 import 'package:seva_meal/screens/donor/donor_home_screen.dart';
-import 'package:seva_meal/screens/shared_screen/donor_notifiication_screen.dart';
 import 'package:seva_meal/screens/volunteer/volunteer_home_screen.dart';
+import 'package:seva_meal/screens/volunteer/volunteer_notification_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String role;
@@ -33,13 +34,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             DonorHomeScreen(),
             HistoryScreen(role: widget.role),
             DonorCreateScreen(),
-            NotificatoinScreen(role: widget.role),
+            DonorNotificationScreen(),
             AccountScreen(role: widget.role),
           ]
         : [
             VolunteerHomeScreen(),
             HistoryScreen(role: widget.role),
-            NotificatoinScreen(role: widget.role),
+            VolunteerNotificationScreen(),
             AccountScreen(role: widget.role),
           ];
 

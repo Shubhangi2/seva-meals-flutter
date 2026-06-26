@@ -6,6 +6,7 @@ import 'package:seva_meal/core/utils/user_session.dart';
 import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/providers/user_auth_provider.dart';
 import 'package:seva_meal/screens/login_screen.dart';
+import 'package:seva_meal/screens/shared_screen/edit_profile_screen.dart';
 import 'package:seva_meal/screens/shared_widgets/wave_clip_banner.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -171,21 +172,29 @@ class _AccountScreenState extends State<AccountScreen> {
                   Row(
                     spacing: 8,
                     children: [
-                      Icon(Icons.phone_outlined, color: AppColors.grayDarkest, size: 20),
-                      Text(user?.mobileNo ?? '-', style: TextStyle(color: AppColors.grayDarkest)),
+                      Icon(Icons.location_city_outlined, color: AppColors.grayDarkest, size: 20),
+                      Text(user?.city ?? '-', style: TextStyle(color: AppColors.grayDarkest)),
                     ],
                   ),
                   Row(
                     spacing: 8,
                     children: [
                       Icon(Icons.location_on_outlined, color: AppColors.grayDarkest, size: 20),
-                      Text(user?.city ?? '-', style: TextStyle(color: AppColors.grayDarkest)),
+                      Text(user?.region ?? '-', style: TextStyle(color: AppColors.grayDarkest)),
                     ],
                   ),
                 ],
               ),
             ),
-            Icon(Icons.edit_rounded, color: AppColors.primary),
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EditProfileScreen()),
+                );
+              },
+              child: Icon(Icons.edit_rounded, color: AppColors.primary),
+            ),
           ],
         ),
       ),
