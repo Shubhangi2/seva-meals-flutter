@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:seva_meal/core/app_colors.dart';
 import 'package:seva_meal/models/post_model.dart';
+import 'package:seva_meal/screens/donor/donor_donation_detail_screen.dart';
 
 class DonationCard extends StatelessWidget {
   final PostModel postModel;
@@ -85,7 +86,14 @@ class DonationCard extends StatelessWidget {
                 width: 30,
                 decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.primaryLightest),
                 child: InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DonorPostDetailScreen(post: postModel),
+                      ),
+                    );
+                  },
                   child: Icon(Icons.chevron_right, color: AppColors.primary),
                 ),
               ),

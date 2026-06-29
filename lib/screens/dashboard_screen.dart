@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:seva_meal/core/app_colors.dart';
 import 'package:seva_meal/core/constants.dart';
+import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/screens/donor/donor_notification_screen.dart';
 import 'package:seva_meal/screens/shared_screen/account_screen.dart';
 import 'package:seva_meal/screens/donor/donor_create_screen.dart';
@@ -10,8 +11,8 @@ import 'package:seva_meal/screens/volunteer/volunteer_home_screen.dart';
 import 'package:seva_meal/screens/volunteer/volunteer_notification_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  final String role;
-  const DashboardScreen({super.key, required this.role});
+  final UserModel user;
+  const DashboardScreen({super.key, required this.user});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -24,24 +25,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    print(widget.role);
+    print(widget.user);
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> screenList = widget.role == Constants.ROLE_DONOR
+    print(widget.user.role == Constants.ROLE_DONOR);
+    List<Widget> screenList = widget.user.role == Constants.ROLE_DONOR
         ? [
-            DonorHomeScreen(),
-            HistoryScreen(role: widget.role),
+            DonorHomeScreen(user: widget.user),
+            HistoryScreen(role: widget.user.role),
             DonorCreateScreen(),
             DonorNotificationScreen(),
-            AccountScreen(role: widget.role),
+            AccountScreen(role: widget.user.role),
           ]
         : [
             VolunteerHomeScreen(),
-            HistoryScreen(role: widget.role),
+            HistoryScreen(role: widget.user.role),
             VolunteerNotificationScreen(),
-            AccountScreen(role: widget.role),
+            AccountScreen(role: widget.user.role),
           ];
 
     return Scaffold(
@@ -70,7 +72,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         unselectedItemColor: AppColors.grayDark,
         showSelectedLabels: true,
         showUnselectedLabels: false,
-        items: widget.role == Constants.ROLE_DONOR
+        items: widget.user == Constants.ROLE_DONOR
             ? [
                 BottomNavigationBarItem(icon: Icon(Icons.home, size: 25), label: "Home"),
                 BottomNavigationBarItem(icon: Icon(Icons.history, size: 25), label: "History"),

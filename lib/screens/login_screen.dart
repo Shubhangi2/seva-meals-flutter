@@ -67,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (user.role.isNotEmpty) {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => DashboardScreen(role: user.role)),
+            MaterialPageRoute(builder: (context) => DashboardScreen(user: user)),
             (_) => false,
           );
         } else {

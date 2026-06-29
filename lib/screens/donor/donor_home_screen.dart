@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
 import 'package:seva_meal/db/shared_prefs.dart';
 import 'package:seva_meal/models/post_model.dart';
+import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/providers/donor_provider.dart';
 import 'package:seva_meal/screens/shared_widgets/custom_button.dart';
 import 'package:seva_meal/screens/shared_widgets/donation_card.dart';
@@ -11,7 +12,8 @@ import 'package:seva_meal/screens/shared_widgets/wave_clip_banner.dart';
 import 'package:seva_meal/services/fcm_service.dart';
 
 class DonorHomeScreen extends StatefulWidget {
-  const DonorHomeScreen({super.key});
+  final UserModel user;
+  const DonorHomeScreen({super.key, required this.user});
 
   @override
   State<DonorHomeScreen> createState() => _DonorHomeScreenState();
@@ -63,7 +65,7 @@ class _DonorHomeScreenState extends State<DonorHomeScreen> {
                                 Text("Hello", style: TextStyle(fontSize: 12)),
                                 Spacer(),
                                 Text(
-                                  "Shubhangi Jadhav",
+                                  widget.user.fullName,
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                 ),
                               ],

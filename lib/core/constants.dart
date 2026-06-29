@@ -13,6 +13,10 @@ class Constants {
   static const String STATUS_APPROVED = "approved";
   static const String STATUS_REJECTED = "rejected";
 
+  static const String STATUS_ASSIGNED = "assigned";
+  static const String STATUS_COLLECTED = "collected";
+  static const String STATUS_DELIVERED = "delivered";
+
   static const String USER_MODEL = 'UserModel';
 
   static const String ROLE_VOLUNTEER = 'volunteer';

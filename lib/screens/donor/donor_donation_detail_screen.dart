@@ -1,108 +1,112 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
+import 'package:seva_meal/core/constants.dart';
 import 'package:seva_meal/models/post_model.dart';
+import 'package:seva_meal/providers/donor_provider.dart';
+import 'package:seva_meal/screens/shared_widgets/loader.dart';
+import 'package:seva_meal/screens/shared_widgets/show_snackbar.dart';
 
-class DonationDetailDonorScreen extends StatefulWidget {
+class DonorPostDetailScreen extends StatefulWidget {
   final PostModel post;
-  const DonationDetailDonorScreen({super.key, required this.post});
+  const DonorPostDetailScreen({super.key, required this.post});
 
   @override
-  State<DonationDetailDonorScreen> createState() => _DonationDetailDonorScreenState();
+  State<DonorPostDetailScreen> createState() => _DonorPostDetailScreenState();
 }
 
-class _DonationDetailDonorScreenState extends State<DonationDetailDonorScreen> {
-  // mock status — replace with real Firestore stream
-  final String _status = 'assigned'; // open | assigned | collected | delivered
+class _DonorPostDetailScreenState extends State<DonorPostDetailScreen> {
+  bool _isLoading = false;
+
+  bool get _canCancel =>
+      widget.post.status == Constants.STATUS_PENDING ||
+      widget.post.status == Constants.STATUS_ASSIGNED;
+
+  // ─── CANCEL POST ───
+  void _showCancelDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Cancel donation?',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary),
+        ),
+        content: Text(
+          widget.post.status == Constants.STATUS_ASSIGNED
+              ? 'A volunteer has already accepted this pickup. Cancelling will remove them from the mission.'
+              : 'Are you sure you want to cancel this donation? This cannot be undone.',
+          style: TextStyle(fontSize: 13, color: AppColors.primaryLight),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Keep it', style: TextStyle(color: AppColors.primaryLight)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _cancelPost();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFC62828),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+            ),
+            child: const Text('Yes, cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _cancelPost() async {
+    // setState(() => _isLoading = true);
+
+    // final res = await context.read<DonorProvider>().cancelPost(widget.post.id);
+
+    // res.fold((l) => showSnackBar(context, l.message, false), (r) {
+    //   showSnackBar(context, "Donation cancelled", true);
+    //   Navigator.pop(context);
+    // });
+
+    // setState(() => _isLoading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bgColor,
-      body: Column(
-        children: [
-          Expanded(
-            child: CustomScrollView(
-              slivers: [
-                _buildSliverAppBar(),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildTitleRow(),
-                        const SizedBox(height: 16),
-                        _buildStatusTracker(),
-                        const SizedBox(height: 16),
-                        _buildInfoGrid(),
-                        const SizedBox(height: 16),
-                        _buildVolunteersSection(),
-                        const SizedBox(height: 16),
-                        if (_status == 'delivered') _buildProofPhoto(),
-                        if (_status == 'delivered') const SizedBox(height: 16),
-                        _buildPickupLocation(),
-                        const SizedBox(height: 16),
-                        _buildDonationInfo(),
-                        const SizedBox(height: 100),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          _buildBottomCTA(),
-        ],
-      ),
-    );
-  }
-
-  // ─── SLIVER APP BAR ───
-  Widget _buildSliverAppBar() {
-    return SliverAppBar(
-      expandedHeight: 220,
-      pinned: true,
-      backgroundColor: AppColors.primary,
-      leading: GestureDetector(
-        onTap: () => Navigator.pop(context),
-        child: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: const BoxDecoration(color: Colors.black26, shape: BoxShape.circle),
-          child: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-        ),
-      ),
-      flexibleSpace: FlexibleSpaceBar(
-        background: Stack(
-          fit: StackFit.expand,
+      body: SafeArea(
+        child: Column(
           children: [
-            // food photo
-            Image.network(
-              widget.post.pickupFoodPictureUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: AppColors.primaryDeep,
-                child: Icon(Icons.fastfood_rounded, color: AppColors.primaryLightest, size: 60),
-              ),
-            ),
-            // gradient overlay
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, AppColors.primary.withOpacity(0.8)],
+            _buildHeader(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildPhotoSection(),
+                    const SizedBox(height: 16),
+                    _buildStatusTracker(),
+                    const SizedBox(height: 16),
+                    if (widget.post.status != Constants.STATUS_PENDING) _buildVolunteerCard(),
+                    if (widget.post.status != Constants.STATUS_PENDING) const SizedBox(height: 16),
+                    if (widget.post.status == Constants.STATUS_DELIVERED) _buildProofPhoto(),
+                    if (widget.post.status == Constants.STATUS_DELIVERED)
+                      const SizedBox(height: 16),
+                    _buildFoodDetails(),
+                    const SizedBox(height: 16),
+                    _buildLocationDetails(),
+                    const SizedBox(height: 16),
+                    _buildPostMeta(),
+                    const SizedBox(height: 24),
+                    _buildBottomCTA(),
+                    const SizedBox(height: 20),
+                  ],
                 ),
-              ),
-            ),
-            // status badge on photo
-            Positioned(bottom: 14, left: 16, child: _buildStatusBadge()),
-            // donation id
-            Positioned(
-              bottom: 14,
-              right: 16,
-              child: Text(
-                '#FD-2024-0847',
-                style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 11),
               ),
             ),
           ],
@@ -111,73 +115,107 @@ class _DonationDetailDonorScreenState extends State<DonationDetailDonorScreen> {
     );
   }
 
-  Widget _buildStatusBadge() {
-    final map = {
-      'open': ['Waiting for volunteer', Colors.orange],
-      'assigned': ['Volunteer assigned', AppColors.primaryLight],
-      'collected': ['Food collected', const Color(0xFF4CAF50)],
-      'delivered': ['Delivered ✓', const Color(0xFF2E7D32)],
-    };
-    final data = map[_status]!;
+  // ─── HEADER ───
+  Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      color: AppColors.primary,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Icon(Icons.arrow_back_rounded, color: AppColors.primaryLightest),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Donation Details',
+                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  'ID: ${widget.post.postId}',
+                  style: TextStyle(color: AppColors.primaryLightest.withOpacity(0.6), fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          _buildStatusBadge(),
+        ],
+      ),
+    );
+  }
+
+  // ─── STATUS BADGE ───
+  Widget _buildStatusBadge() {
+    final config = _statusConfig(widget.post.status);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: (data[1] as Color).withOpacity(0.2),
+        color: (config['color'] as Color).withOpacity(0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: (data[1] as Color).withOpacity(0.6)),
+        border: Border.all(color: (config['color'] as Color).withOpacity(0.4)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 7,
-            height: 7,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: data[1] as Color),
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: config['color'] as Color),
           ),
           const SizedBox(width: 5),
           Text(
-            data[0] as String,
-            style: TextStyle(color: data[1] as Color, fontSize: 11, fontWeight: FontWeight.w600),
+            config['label'] as String,
+            style: TextStyle(
+              color: config['color'] as Color,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ─── TITLE ROW ───
-  Widget _buildTitleRow() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.post.title,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.primary),
+  // ─── PHOTO ───
+  Widget _buildPhotoSection() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: SizedBox(
+        height: 180,
+        width: double.infinity,
+        child: Image.network(
+          widget.post.pickupFoodPictureUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(
+            color: AppColors.primaryLightest.withOpacity(0.3),
+            child: Icon(Icons.fastfood_rounded, color: AppColors.primaryLight, size: 48),
+          ),
         ),
-        const SizedBox(height: 6),
-        Row(
-          children: [
-            _buildChip(widget.post.foodType, AppColors.primaryLightest, AppColors.primaryDeep),
-            const SizedBox(width: 6),
-            _buildChip('🌿 Veg', const Color(0xFFDCFCE7), const Color(0xFF166534)),
-            const SizedBox(width: 6),
-            _buildChip('Posted today', AppColors.bgColor, AppColors.primaryLight),
-          ],
-        ),
-      ],
+      ),
     );
   }
 
   // ─── STATUS TRACKER ───
   Widget _buildStatusTracker() {
     final steps = [
-      {'label': 'Posted', 'icon': Icons.check_circle_rounded, 'status': 'open'},
-      {'label': 'Assigned', 'icon': Icons.person_rounded, 'status': 'assigned'},
-      {'label': 'Collected', 'icon': Icons.shopping_bag_rounded, 'status': 'collected'},
-      {'label': 'Delivered', 'icon': Icons.favorite_rounded, 'status': 'delivered'},
+      {'label': 'Posted', 'icon': Icons.check_circle_rounded},
+      {'label': 'Assigned', 'icon': Icons.person_rounded},
+      {'label': 'Collected', 'icon': Icons.shopping_bag_rounded},
+      {'label': 'Delivered', 'icon': Icons.favorite_rounded},
     ];
 
-    final statusOrder = ['open', 'assigned', 'collected', 'delivered'];
-    final currentIndex = statusOrder.indexOf(_status);
+    final statusOrder = [
+      Constants.STATUS_PENDING,
+      Constants.STATUS_ASSIGNED,
+      Constants.STATUS_COLLECTED,
+      Constants.STATUS_DELIVERED,
+    ];
+
+    final currentIndex = statusOrder.indexOf(widget.post.status).clamp(0, 3);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -190,36 +228,31 @@ class _DonationDetailDonorScreenState extends State<DonationDetailDonorScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Donation Status',
+            'Status',
             style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary),
           ),
           const SizedBox(height: 16),
           Row(
             children: List.generate(steps.length * 2 - 1, (index) {
-              // line between steps
               if (index.isOdd) {
-                final lineIndex = index ~/ 2;
-                final done = lineIndex < currentIndex;
+                final done = index ~/ 2 < currentIndex;
                 return Expanded(
                   child: Container(
                     height: 2,
-                    margin: const EdgeInsets.only(bottom: 20),
+                    margin: const EdgeInsets.only(bottom: 22),
                     color: done ? AppColors.primaryLight : AppColors.primaryLightest,
                   ),
                 );
               }
-
               final stepIndex = index ~/ 2;
-              final step = steps[stepIndex];
               final done = stepIndex <= currentIndex;
               final active = stepIndex == currentIndex;
-
               return Column(
                 children: [
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    width: 36,
-                    height: 36,
+                    width: 34,
+                    height: 34,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: done ? AppColors.primary : AppColors.primaryLightest,
@@ -233,16 +266,16 @@ class _DonationDetailDonorScreenState extends State<DonationDetailDonorScreen> {
                       ),
                     ),
                     child: Icon(
-                      step['icon'] as IconData,
-                      size: 16,
+                      steps[stepIndex]['icon'] as IconData,
+                      size: 15,
                       color: done ? Colors.white : AppColors.primaryLight.withOpacity(0.4),
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 5),
                   Text(
-                    step['label'] as String,
+                    steps[stepIndex]['label'] as String,
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 9,
                       fontWeight: active ? FontWeight.w600 : FontWeight.w400,
                       color: done ? AppColors.primary : AppColors.primaryLight.withOpacity(0.5),
                     ),
@@ -251,8 +284,6 @@ class _DonationDetailDonorScreenState extends State<DonationDetailDonorScreen> {
               );
             }),
           ),
-
-          // status message
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -264,77 +295,11 @@ class _DonationDetailDonorScreenState extends State<DonationDetailDonorScreen> {
               children: [
                 Icon(Icons.info_outline_rounded, size: 14, color: AppColors.primaryLight),
                 const SizedBox(width: 8),
-                Text(
-                  _getStatusMessage(),
-                  style: TextStyle(fontSize: 12, color: AppColors.primaryDeep),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getStatusMessage() {
-    switch (_status) {
-      case 'open':
-        return 'Looking for a volunteer near you...';
-      case 'assigned':
-        return 'Arjun Kumar is on the way to collect your food';
-      case 'collected':
-        return 'Food has been collected and is heading to NGO';
-      case 'delivered':
-        return 'Your food was delivered successfully 🎉';
-      default:
-        return '';
-    }
-  }
-
-  // ─── INFO GRID ───
-  Widget _buildInfoGrid() {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 10,
-      mainAxisSpacing: 10,
-      childAspectRatio: 2.8,
-      children: [
-        _buildInfoTile(Icons.fastfood_rounded, 'Quantity', '60 portions'),
-        _buildInfoTile(Icons.access_time_rounded, 'Expires', '3 hours'),
-        _buildInfoTile(Icons.location_on_rounded, 'Location', 'Andheri East'),
-        _buildInfoTile(Icons.group_rounded, 'Volunteers', '1 assigned'),
-      ],
-    );
-  }
-
-  Widget _buildInfoTile(IconData icon, String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryLightest),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: AppColors.primaryLight),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(label, style: TextStyle(fontSize: 10, color: AppColors.primaryLight)),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                Expanded(
+                  child: Text(
+                    _getStatusMessage(),
+                    style: TextStyle(fontSize: 12, color: AppColors.primaryDeep),
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -344,8 +309,8 @@ class _DonationDetailDonorScreenState extends State<DonationDetailDonorScreen> {
     );
   }
 
-  // ─── VOLUNTEERS SECTION ───
-  Widget _buildVolunteersSection() {
+  // ─── VOLUNTEER CARD ───
+  Widget _buildVolunteerCard() {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -357,91 +322,95 @@ class _DonationDetailDonorScreenState extends State<DonationDetailDonorScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Volunteers on this mission',
+            'Assigned Volunteer',
             style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary),
           ),
           const SizedBox(height: 12),
-
-          // volunteer row
-          if (_status != 'open')
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.primary),
-                  child: const Center(
-                    child: Text(
-                      'AK',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Arjun Kumar',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Icon(Icons.star_rounded, size: 12, color: Colors.amber),
-                          const SizedBox(width: 3),
-                          Text(
-                            '4.9 · 32 missions',
-                            style: TextStyle(fontSize: 11, color: AppColors.primaryLight),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                // volunteer status chip
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryLightest,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.primary),
+                child: const Center(
                   child: Text(
-                    _status == 'assigned' ? 'En route' : 'Active',
+                    'AK',
                     style: TextStyle(
-                      fontSize: 10,
-                      color: AppColors.primaryDeep,
+                      color: Colors.white,
                       fontWeight: FontWeight.w600,
+                      fontSize: 14,
                     ),
                   ),
                 ),
-              ],
-            )
-          else
-            Row(
-              children: [
-                Icon(Icons.search_rounded, size: 16, color: AppColors.primaryLight),
-                const SizedBox(width: 8),
-                Text(
-                  'Looking for volunteers nearby...',
-                  style: TextStyle(fontSize: 13, color: AppColors.primaryLight),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Arjun Kumar',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Icon(Icons.star_rounded, size: 13, color: Colors.amber),
+                        const SizedBox(width: 3),
+                        Text(
+                          '4.9 · 32 missions',
+                          style: TextStyle(fontSize: 11, color: AppColors.primaryLight),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
+              if (widget.post.status == Constants.STATUS_ASSIGNED ||
+                  widget.post.status == Constants.STATUS_COLLECTED)
+                GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.call_rounded, color: Colors.white, size: 18),
+                  ),
+                ),
+            ],
+          ),
+          if (widget.post.status == Constants.STATUS_ASSIGNED) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.bgColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.directions_bike_rounded, size: 14, color: AppColors.primaryLight),
+                  const SizedBox(width: 8),
+                  Text(
+                    'En route · ETA 8 minutes',
+                    style: TextStyle(fontSize: 12, color: AppColors.primaryDeep),
+                  ),
+                ],
+              ),
             ),
+          ],
         ],
       ),
     );
   }
 
-  // ─── PROOF PHOTO (after delivery) ───
+  // ─── PROOF PHOTO ───
   Widget _buildProofPhoto() {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -487,8 +456,8 @@ class _DonationDetailDonorScreenState extends State<DonationDetailDonorScreen> {
     );
   }
 
-  // ─── PICKUP LOCATION ───
-  Widget _buildPickupLocation() {
+  // ─── FOOD DETAILS ───
+  Widget _buildFoodDetails() {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -499,30 +468,19 @@ class _DonationDetailDonorScreenState extends State<DonationDetailDonorScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Pickup Address',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Icon(Icons.location_on_rounded, size: 16, color: AppColors.primaryLight),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  widget.post.pickupAddress,
-                  style: TextStyle(fontSize: 13, color: AppColors.primaryDeep),
-                ),
-              ),
-            ],
-          ),
+          _buildSectionLabel('Food Details', Icons.fastfood_rounded),
+          const SizedBox(height: 12),
+          _buildDetailRow('Title', widget.post.title),
+          _buildDetailRow('Description', widget.post.description),
+          _buildDetailRow('Food Type', widget.post.foodType),
+          _buildDetailRow('Quantity', '${widget.post.quantity} portions'),
         ],
       ),
     );
   }
 
-  // ─── DONATION INFO ───
-  Widget _buildDonationInfo() {
+  // ─── LOCATION DETAILS ───
+  Widget _buildLocationDetails() {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -533,17 +491,114 @@ class _DonationDetailDonorScreenState extends State<DonationDetailDonorScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Donation Details',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary),
-          ),
-          const SizedBox(height: 10),
-          _buildDetailRow('Special instructions', 'Bring containers. Call on arrival.'),
-          _buildDetailRow('Preferred NGO', 'Any available'),
-          _buildDetailRow('Max volunteers needed', '3'),
-          _buildDetailRow('Posted at', 'Today, 10:34 AM'),
+          _buildSectionLabel('Pickup Location', Icons.location_on_rounded),
+          const SizedBox(height: 12),
+          _buildDetailRow('City', widget.post.city),
+          _buildDetailRow('Area', widget.post.region),
+          _buildDetailRow('Address', widget.post.pickupAddress),
         ],
       ),
+    );
+  }
+
+  // ─── POST META ───
+  Widget _buildPostMeta() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.primaryLightest),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionLabel('Post Info', Icons.info_outline_rounded),
+          const SizedBox(height: 12),
+          _buildDetailRow('Posted', _formatDate(widget.post.createdAt)),
+          _buildDetailRow('Last updated', _formatDate(widget.post.updatedAt)),
+          _buildDetailRow('Active', widget.post.isActive ? 'Yes' : 'No'),
+        ],
+      ),
+    );
+  }
+
+  // ─── BOTTOM CTA ───
+  Widget _buildBottomCTA() {
+    if (_isLoading) return const Loader();
+
+    if (widget.post.status == Constants.STATUS_DELIVERED) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE8F5E9),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: const Center(
+          child: Text(
+            '🎉  Donation delivered successfully',
+            style: TextStyle(color: Color(0xFF2E7D32), fontWeight: FontWeight.w600, fontSize: 14),
+          ),
+        ),
+      );
+    }
+
+    if (widget.post.status == Constants.STATUS_COLLECTED) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.primaryLightest.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.primaryLightest),
+        ),
+        child: Center(
+          child: Text(
+            '📦  Food collected · heading to NGO',
+            style: TextStyle(
+              color: AppColors.primaryDeep,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (_canCancel) {
+      return SizedBox(
+        width: double.infinity,
+        child: OutlinedButton(
+          onPressed: _showCancelDialog,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFFC62828),
+            side: const BorderSide(color: Color(0xFFEF9A9A)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(vertical: 14),
+          ),
+          child: const Text(
+            'Cancel Donation',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          ),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  // ─── HELPERS ───
+  Widget _buildSectionLabel(String title, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, size: 15, color: AppColors.primaryLight),
+        const SizedBox(width: 6),
+        Text(
+          title,
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primaryDeep),
+        ),
+      ],
     );
   }
 
@@ -554,7 +609,7 @@ class _DonationDetailDonorScreenState extends State<DonationDetailDonorScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 160,
+            width: 110,
             child: Text(label, style: TextStyle(fontSize: 12, color: AppColors.primaryLight)),
           ),
           Expanded(
@@ -568,153 +623,46 @@ class _DonationDetailDonorScreenState extends State<DonationDetailDonorScreen> {
     );
   }
 
-  // ─── BOTTOM CTA ───
-  Widget _buildBottomCTA() {
-    // if delivered — no action needed
-    if (_status == 'delivered') {
-      return Container(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: AppColors.primaryLightest, width: 0.5)),
-        ),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            color: const Color(0xFFE8F5E9),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: const Center(
-            child: Text(
-              '🎉  Donation delivered successfully',
-              style: TextStyle(color: Color(0xFF2E7D32), fontWeight: FontWeight.w600, fontSize: 14),
-            ),
-          ),
-        ),
-      );
+  Map<String, dynamic> _statusConfig(String status) {
+    switch (status) {
+      case Constants.STATUS_PENDING:
+        return {'label': 'Waiting', 'color': Colors.orange};
+      case Constants.STATUS_ASSIGNED:
+        return {'label': 'Assigned', 'color': AppColors.primaryLight};
+      case Constants.STATUS_COLLECTED:
+        return {'label': 'Collected', 'color': const Color(0xFF4CAF50)};
+      case Constants.STATUS_DELIVERED:
+        return {'label': 'Delivered ✓', 'color': const Color(0xFF2E7D32)};
+      default:
+        return {'label': 'Unknown', 'color': Colors.grey};
     }
-
-    // if open — show cancel button
-    if (_status == 'open') {
-      return Container(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: AppColors.primaryLightest, width: 0.5)),
-        ),
-        child: SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: () => _showCancelDialog(),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFFC62828),
-              side: const BorderSide(color: Color(0xFFEF9A9A)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              padding: const EdgeInsets.symmetric(vertical: 15),
-            ),
-            child: const Text(
-              'Cancel Donation',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-            ),
-          ),
-        ),
-      );
-    }
-
-    // if assigned or collected — show tracking info
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: AppColors.primaryLightest, width: 0.5)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Volunteer en route',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
-                ),
-                Text(
-                  'ETA: 8 minutes',
-                  style: TextStyle(fontSize: 12, color: AppColors.primaryLight),
-                ),
-              ],
-            ),
-          ),
-          // call volunteer button
-          ElevatedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.call_rounded, size: 16),
-            label: const Text('Call'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              elevation: 0,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
-  // ─── CANCEL DIALOG ───
-  void _showCancelDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Cancel donation?',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary),
-        ),
-        content: Text(
-          'Are you sure you want to cancel this donation? This cannot be undone.',
-          style: TextStyle(fontSize: 13, color: AppColors.primaryLight),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Keep it', style: TextStyle(color: AppColors.primaryLight)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              // call cancel function here
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFC62828),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              elevation: 0,
-            ),
-            child: const Text('Cancel donation'),
-          ),
-        ],
-      ),
-    );
+  String _getStatusMessage() {
+    switch (widget.post.status) {
+      case Constants.STATUS_PENDING:
+        return 'Looking for a volunteer near you...';
+      case Constants.STATUS_ASSIGNED:
+        return 'Volunteer is on the way to collect your food';
+      case Constants.STATUS_COLLECTED:
+        return 'Food collected and heading to NGO';
+      case Constants.STATUS_DELIVERED:
+        return 'Your food was delivered successfully 🎉';
+      default:
+        return '';
+    }
   }
 
-  // ─── CHIP ───
-  Widget _buildChip(String text, Color bg, Color textColor) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: textColor),
-      ),
-    );
+  String _formatDate(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      final now = DateTime.now();
+      final diff = now.difference(date);
+      if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+      if (diff.inHours < 24) return '${diff.inHours}h ago';
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (_) {
+      return dateString;
+    }
   }
 }

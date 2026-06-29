@@ -36,7 +36,7 @@ class _AccountScreenState extends State<AccountScreen> {
           toolbarHeight: 46,
           backgroundColor: AppColors.primaryDeep,
           title: Text(
-            "My Donor Account",
+            "My ${user?.role} Account",
             style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white, fontSize: 18),
           ),
         ),

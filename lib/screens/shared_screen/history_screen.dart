@@ -17,9 +17,9 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   List<PostModel> posts = [];
 
+  @override
   void initState() {
     super.initState();
-
     callAsyncTask();
   }
 

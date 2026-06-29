@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => DashboardScreen(role: userModel.role)),
+        MaterialPageRoute(builder: (context) => DashboardScreen(user: userModel)),
       );
     }
   }

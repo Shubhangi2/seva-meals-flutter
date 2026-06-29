@@ -33,8 +33,12 @@ class _VolunteerHomeScreenState extends State<VolunteerHomeScreen> {
   Future<void> callAsyncTask() async {
     final activePosts = await context.read<VolunteerProvider>().getActivePostsByRegion();
     activePosts.fold((l) => print(l.message), (r) {
-      setState(() {
-        this.activePosts = r;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            this.activePosts = r;
+          });
+        }
       });
     });
   }

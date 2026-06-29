@@ -8,7 +8,6 @@ import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/providers/user_auth_provider.dart';
 import 'package:seva_meal/screens/dashboard_screen.dart';
 import 'package:seva_meal/screens/shared_screen/select_city_screen.dart';
-
 import 'package:seva_meal/screens/shared_widgets/custom_button.dart';
 
 class SelectRoleScreen extends StatefulWidget {
@@ -30,7 +29,7 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => DashboardScreen(role: widget.user.role)),
+        MaterialPageRoute(builder: (context) => DashboardScreen(user: widget.user)),
       );
     }
   }

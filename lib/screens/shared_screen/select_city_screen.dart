@@ -30,7 +30,7 @@ class _SelectCityScreenState extends State<SelectCityScreen> {
     context.read<UserAuthProvider>().saveUserDetails(widget.user);
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => DashboardScreen(role: widget.user.role)),
+      MaterialPageRoute(builder: (context) => DashboardScreen(user: widget.user)),
     );
   }
 
@@ -109,9 +109,7 @@ class _SelectCityScreenState extends State<SelectCityScreen> {
                     const SizedBox(height: 24),
                     _buildSummaryCard(),
                   ],
-
                   const SizedBox(height: 24),
-
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
