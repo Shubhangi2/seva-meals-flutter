@@ -44,4 +44,21 @@ class UserModel {
       'region': region,
     };
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is UserModel &&
+        other.id == id &&
+        other.role == role &&
+        other.fullName == fullName &&
+        other.mobileNo == mobileNo &&
+        other.email == email &&
+        other.fcmToken == fcmToken &&
+        other.city == city &&
+        other.region == region;
+  }
+
+  @override
+  int get hashCode => Object.hash(id, role, fullName, mobileNo, email, fcmToken, city, region);
 }

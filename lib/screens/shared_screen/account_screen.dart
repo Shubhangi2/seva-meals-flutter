@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
 import 'package:seva_meal/core/constants.dart';
-import 'package:seva_meal/core/utils/user_session.dart';
 import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/providers/user_auth_provider.dart';
 import 'package:seva_meal/screens/login_screen.dart';
@@ -11,22 +10,14 @@ import 'package:seva_meal/screens/shared_widgets/wave_clip_banner.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AccountScreen extends StatefulWidget {
-  final String role;
-  const AccountScreen({super.key, required this.role});
+  final UserModel user;
+  const AccountScreen({super.key, required this.user});
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  UserModel? user;
-
-  @override
-  void initState() {
-    super.initState();
-    user = UserSession().user;
-  }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -36,7 +27,7 @@ class _AccountScreenState extends State<AccountScreen> {
           toolbarHeight: 46,
           backgroundColor: AppColors.primaryDeep,
           title: Text(
-            "My ${user?.role} Account",
+            "My ${widget.user.role} Account",
             style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white, fontSize: 18),
           ),
         ),
@@ -159,28 +150,28 @@ class _AccountScreenState extends State<AccountScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    user?.fullName ?? '',
+                    widget.user.fullName,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   Row(
                     spacing: 8,
                     children: [
                       Icon(Icons.email_outlined, color: AppColors.grayDarkest, size: 20),
-                      Text(user?.email ?? '', style: TextStyle(color: AppColors.grayDarkest)),
+                      Text(widget.user.email, style: TextStyle(color: AppColors.grayDarkest)),
                     ],
                   ),
                   Row(
                     spacing: 8,
                     children: [
                       Icon(Icons.location_city_outlined, color: AppColors.grayDarkest, size: 20),
-                      Text(user?.city ?? '-', style: TextStyle(color: AppColors.grayDarkest)),
+                      Text(widget.user.city, style: TextStyle(color: AppColors.grayDarkest)),
                     ],
                   ),
                   Row(
                     spacing: 8,
                     children: [
                       Icon(Icons.location_on_outlined, color: AppColors.grayDarkest, size: 20),
-                      Text(user?.region ?? '-', style: TextStyle(color: AppColors.grayDarkest)),
+                      Text(widget.user.region, style: TextStyle(color: AppColors.grayDarkest)),
                     ],
                   ),
                 ],
@@ -190,7 +181,7 @@ class _AccountScreenState extends State<AccountScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => EditProfileScreen()),
+                  MaterialPageRoute(builder: (context) => EditProfileScreen(user: widget.user)),
                 );
               },
               child: Icon(Icons.edit_rounded, color: AppColors.primary),

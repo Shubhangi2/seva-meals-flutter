@@ -36,4 +36,8 @@ class UserAuthProvider extends ChangeNotifier {
   Future<void> saveUserDetails(UserModel user) async {
     return await authDatasource.saveUserDetails(user);
   }
+
+  Future<Either<Failure, UserModel>> editUser(UserModel updatedUser) async {
+    return await authDatasource.editUser(updatedUser);
+  }
 }

@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
+import 'package:seva_meal/core/constants.dart';
+import 'package:seva_meal/models/user_model.dart';
+import 'package:seva_meal/providers/user_auth_provider.dart';
+import 'package:seva_meal/screens/shared_widgets/custom_dropdown_widget.dart';
+import 'package:seva_meal/screens/shared_widgets/custom_text_form_field.dart';
+import 'package:seva_meal/screens/shared_widgets/show_snackbar.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({super.key});
+  final UserModel user;
+  const EditProfileScreen({super.key, required this.user});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -15,18 +24,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late final TextEditingController _fullNameController;
   late final TextEditingController _mobileNoController;
   late final TextEditingController _emailController;
-  late final TextEditingController _cityController;
-  late final TextEditingController _regionController;
 
   @override
   void initState() {
     super.initState();
-    // Replace with actual UserSession().user values
-    _fullNameController = TextEditingController(text: 'John Doe');
-    _mobileNoController = TextEditingController(text: '+91 98765 43210');
-    _emailController = TextEditingController(text: 'john.doe@email.com');
-    _cityController = TextEditingController(text: 'Mumbai');
-    _regionController = TextEditingController(text: 'Maharashtra');
+    _fullNameController = TextEditingController(text: widget.user.fullName);
+    _mobileNoController = TextEditingController(text: widget.user.mobileNo);
+    _emailController = TextEditingController(text: widget.user.email);
   }
 
   @override
@@ -34,36 +38,38 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _fullNameController.dispose();
     _mobileNoController.dispose();
     _emailController.dispose();
-    _cityController.dispose();
-    _regionController.dispose();
+
     super.dispose();
   }
 
-  Future<void> _saveChanges() async {
+  Future<void> _saveChanges(String selectedCity, String selectedRegion) async {
     if (!_formKey.currentState!.validate()) return;
 
+    UserModel user = UserModel(
+      id: widget.user.id,
+      role: widget.user.role,
+      fullName: _fullNameController.text,
+      mobileNo: _mobileNoController.text,
+      email: _emailController.text,
+      city: selectedCity,
+      fcmToken: widget.user.fcmToken,
+      region: selectedRegion,
+    );
+    if (user == widget.user) return showSnackBar(context, "No changes made", false);
     setState(() => _isSaving = true);
-
-    // TODO: Call your update API / provider here
-    await Future.delayed(const Duration(seconds: 1)); // simulated delay
+    final res = await context.read<UserAuthProvider>().editUser(user);
+    res.fold((l) => showSnackBar(context, l.message, false), (_) {
+      showSnackBar(context, "Profile updated successfully", true);
+      Navigator.pop(context);
+    });
 
     setState(() => _isSaving = false);
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Profile updated successfully'),
-          backgroundColor: AppColors.primary,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
-      Navigator.pop(context);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    String selectedCity = widget.user.city;
+    String selectedRegion = widget.user.region;
     return SafeArea(
       child: Scaffold(
         backgroundColor: const Color.fromARGB(255, 250, 250, 250),
@@ -130,66 +136,84 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                       const SizedBox(height: 28),
 
-                      // ── Personal Info section ────────────────────────────
                       _sectionLabel('Personal Info'),
                       const SizedBox(height: 12),
 
-                      _buildField(
+                      CustomTextFormField(
                         label: 'Full Name',
                         controller: _fullNameController,
-                        icon: Icons.person_outline_rounded,
-                        hint: 'Enter your full name',
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Full name is required' : null,
+                        prefixIcon: Icon(Icons.person_outline_rounded),
+                        hintText: 'Enter your full name',
+                        textInputType: TextInputType.text,
+                        onValidate: (v) => (v.trim().isEmpty) ? 'Mobile number is required' : null,
+                        inputFormatters: [LengthLimitingTextInputFormatter(100)],
                       ),
                       const SizedBox(height: 14),
 
-                      _buildField(
+                      CustomTextFormField(
                         label: 'Mobile Number',
                         controller: _mobileNoController,
-                        icon: Icons.phone_outlined,
-                        hint: 'Enter your mobile number',
-                        keyboardType: TextInputType.phone,
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Mobile number is required' : null,
+                        prefixIcon: Icon(Icons.phone_outlined),
+                        hintText: 'Enter your mobile number',
+                        textInputType: TextInputType.phone,
+                        onValidate: (v) => null,
+                        inputFormatters: [LengthLimitingTextInputFormatter(10)],
                       ),
                       const SizedBox(height: 14),
 
-                      _buildField(
-                        label: 'Email Address',
+                      CustomTextFormField(
                         controller: _emailController,
-                        icon: Icons.email_outlined,
-                        hint: 'Enter your email',
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty) return 'Email is required';
-                          final emailRegex = RegExp(r'^[\w-.]+@([\w-]+\.)+[\w]{2,4}$');
-                          if (!emailRegex.hasMatch(v.trim())) return 'Enter a valid email';
-                          return null;
+                        label: "Email",
+                        inputFormatters: [LengthLimitingTextInputFormatter(50)],
+                        borderColor: AppColors.grayMedium,
+                        hintText: "Enter email",
+                        hintTextColor: AppColors.grayMedium,
+                        prefixIcon: const Icon(Icons.person, color: AppColors.primary),
+                        onValidate: (value) {
+                          if (value.isEmpty) {
+                            return "Please enter email id";
+                          }
+                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                            return "Please enter a valid email";
+                          }
                         },
+                        textInputType: TextInputType.text,
                       ),
 
                       const SizedBox(height: 28),
 
-                      // ── Location section ─────────────────────────────────
                       _sectionLabel('Location'),
                       const SizedBox(height: 12),
 
-                      _buildField(
-                        label: 'City',
-                        controller: _cityController,
-                        icon: Icons.location_city_outlined,
-                        hint: 'Enter your city',
+                      _sectionLabel('City'),
+                      const SizedBox(height: 8),
+                      CustomDropdownWidget(
+                        initialSelection: selectedCity,
+                        dropdownList: Constants.regionList.keys.toList(),
+                        hintText: 'Select your city',
+                        icon: Icons.location_city_rounded,
+                        onSelected: (value) {
+                          setState(() {
+                            selectedCity = value;
+                          });
+                        },
+                        itemToString: (item) => item,
                       ),
-                      const SizedBox(height: 14),
 
-                      _buildField(
-                        label: 'Region / State',
-                        controller: _regionController,
-                        icon: Icons.location_on_outlined,
-                        hint: 'Enter your region or state',
+                      const SizedBox(height: 20),
+
+                      _sectionLabel('Area / Region'),
+                      const SizedBox(height: 8),
+                      CustomDropdownWidget(
+                        initialSelection: selectedRegion,
+                        dropdownList: Constants.regionList[selectedCity]!,
+                        hintText: 'Select your area',
+                        icon: Icons.map_rounded,
+                        onSelected: (value) {
+                          setState(() => selectedRegion = value);
+                        },
+                        itemToString: (item) => item,
                       ),
-
                       const SizedBox(height: 32),
                     ],
                   ),
@@ -214,7 +238,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isSaving ? null : _saveChanges,
+                  onPressed: _isSaving ? null : () => _saveChanges(selectedCity, selectedRegion),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryDeep,
                     disabledBackgroundColor: AppColors.primaryLight,
@@ -251,56 +275,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Text(
       label,
       style: TextStyle(color: AppColors.primary, fontSize: 15, fontWeight: FontWeight.bold),
-    );
-  }
-
-  Widget _buildField({
-    required String label,
-    required TextEditingController controller,
-    required IconData icon,
-    required String hint,
-    TextInputType? keyboardType,
-    String? Function(String?)? validator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.grayDarkest),
-        ),
-        const SizedBox(height: 6),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          validator: validator,
-          style: TextStyle(fontSize: 14, color: AppColors.grayDarkest, fontWeight: FontWeight.w500),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: AppColors.grayBrightest, fontSize: 14),
-            prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: AppColors.grayBrightest, width: 1),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: AppColors.primary, width: 1.5),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: AppColors.red, width: 1),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: AppColors.red, width: 1.5),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

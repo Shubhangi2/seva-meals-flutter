@@ -30,20 +30,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.user.role == Constants.ROLE_DONOR);
     List<Widget> screenList = widget.user.role == Constants.ROLE_DONOR
         ? [
             DonorHomeScreen(user: widget.user),
             HistoryScreen(role: widget.user.role),
             DonorCreateScreen(),
             DonorNotificationScreen(),
-            AccountScreen(role: widget.user.role),
+            AccountScreen(user: widget.user),
           ]
         : [
             VolunteerHomeScreen(),
             HistoryScreen(role: widget.user.role),
             VolunteerNotificationScreen(),
-            AccountScreen(role: widget.user.role),
+            AccountScreen(user: widget.user),
           ];
 
     return Scaffold(
@@ -72,7 +71,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         unselectedItemColor: AppColors.grayDark,
         showSelectedLabels: true,
         showUnselectedLabels: false,
-        items: widget.user == Constants.ROLE_DONOR
+        items: widget.user.role == Constants.ROLE_DONOR
             ? [
                 BottomNavigationBarItem(icon: Icon(Icons.home, size: 25), label: "Home"),
                 BottomNavigationBarItem(icon: Icon(Icons.history, size: 25), label: "History"),

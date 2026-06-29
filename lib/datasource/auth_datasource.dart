@@ -138,4 +138,16 @@ class AuthDatasource {
       print(e);
     }
   }
+
+  Future<Either<Failure, UserModel>> editUser(UserModel updatedUser) async {
+    try {
+      final db = FirebaseFirestore.instance;
+      await db.collection("users").doc(updatedUser.id).update(updatedUser.toJson());
+      await sharedPrefs.saveUserModel(updatedUser);
+      return right(updatedUser);
+    } catch (e) {
+      print(e);
+    }
+    return left(Failure("Failed to edit user"));
+  }
 }
