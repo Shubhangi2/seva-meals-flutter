@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
+import 'package:seva_meal/core/utils/user_session.dart';
 import 'package:seva_meal/db/shared_prefs.dart';
 import 'package:seva_meal/models/post_model.dart';
 import 'package:seva_meal/models/user_model.dart';
@@ -12,8 +13,7 @@ import 'package:seva_meal/screens/shared_widgets/wave_clip_banner.dart';
 import 'package:seva_meal/services/fcm_service.dart';
 
 class DonorHomeScreen extends StatefulWidget {
-  final UserModel user;
-  const DonorHomeScreen({super.key, required this.user});
+  const DonorHomeScreen({super.key});
 
   @override
   State<DonorHomeScreen> createState() => _DonorHomeScreenState();
@@ -21,6 +21,7 @@ class DonorHomeScreen extends StatefulWidget {
 
 class _DonorHomeScreenState extends State<DonorHomeScreen> {
   List<PostModel> posts = [];
+  UserModel? user;
   @override
   void initState() {
     super.initState();
@@ -29,11 +30,11 @@ class _DonorHomeScreenState extends State<DonorHomeScreen> {
   }
 
   Future<void> callAsyncTask() async {
+    UserModel? user = await UserSession().user;
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() => this.user = user));
     final posts = await context.read<DonorProvider>().getPosts();
     posts.fold((l) => print(l.message), (r) {
-      setState(() {
-        this.posts = r;
-      });
+      WidgetsBinding.instance.addPostFrameCallback((_) => setState(() => this.posts = r));
     });
     SharedPrefs().getFcmToken();
   }
@@ -65,7 +66,7 @@ class _DonorHomeScreenState extends State<DonorHomeScreen> {
                                 Text("Hello", style: TextStyle(fontSize: 12)),
                                 Spacer(),
                                 Text(
-                                  widget.user.fullName,
+                                  user?.fullName ?? '',
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                 ),
                               ],

@@ -23,21 +23,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   late final TextEditingController _fullNameController;
   late final TextEditingController _mobileNoController;
-  late final TextEditingController _emailController;
 
   @override
   void initState() {
     super.initState();
     _fullNameController = TextEditingController(text: widget.user.fullName);
     _mobileNoController = TextEditingController(text: widget.user.mobileNo);
-    _emailController = TextEditingController(text: widget.user.email);
   }
 
   @override
   void dispose() {
     _fullNameController.dispose();
     _mobileNoController.dispose();
-    _emailController.dispose();
 
     super.dispose();
   }
@@ -50,7 +47,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       role: widget.user.role,
       fullName: _fullNameController.text,
       mobileNo: _mobileNoController.text,
-      email: _emailController.text,
+      email: widget.user.email,
       city: selectedCity,
       fcmToken: widget.user.fcmToken,
       region: selectedRegion,
@@ -60,7 +57,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final res = await context.read<UserAuthProvider>().editUser(user);
     res.fold((l) => showSnackBar(context, l.message, false), (_) {
       showSnackBar(context, "Profile updated successfully", true);
-      Navigator.pop(context);
+      Navigator.of(context).pop(true);
     });
 
     setState(() => _isSaving = false);
@@ -158,26 +155,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         textInputType: TextInputType.phone,
                         onValidate: (v) => null,
                         inputFormatters: [LengthLimitingTextInputFormatter(10)],
-                      ),
-                      const SizedBox(height: 14),
-
-                      CustomTextFormField(
-                        controller: _emailController,
-                        label: "Email",
-                        inputFormatters: [LengthLimitingTextInputFormatter(50)],
-                        borderColor: AppColors.grayMedium,
-                        hintText: "Enter email",
-                        hintTextColor: AppColors.grayMedium,
-                        prefixIcon: const Icon(Icons.person, color: AppColors.primary),
-                        onValidate: (value) {
-                          if (value.isEmpty) {
-                            return "Please enter email id";
-                          }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                            return "Please enter a valid email";
-                          }
-                        },
-                        textInputType: TextInputType.text,
                       ),
 
                       const SizedBox(height: 28),

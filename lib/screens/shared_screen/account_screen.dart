@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
 import 'package:seva_meal/core/constants.dart';
+import 'package:seva_meal/core/utils/user_session.dart';
 import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/providers/user_auth_provider.dart';
 import 'package:seva_meal/screens/login_screen.dart';
@@ -10,14 +11,26 @@ import 'package:seva_meal/screens/shared_widgets/wave_clip_banner.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AccountScreen extends StatefulWidget {
-  final UserModel user;
-  const AccountScreen({super.key, required this.user});
+  const AccountScreen({super.key});
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+  UserModel? user;
+  @override
+  void initState() {
+    super.initState();
+
+    callAsyncTask();
+  }
+
+  Future<void> callAsyncTask() async {
+    user = await UserSession().user;
+    setState(() => {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -27,7 +40,7 @@ class _AccountScreenState extends State<AccountScreen> {
           toolbarHeight: 46,
           backgroundColor: AppColors.primaryDeep,
           title: Text(
-            "My ${widget.user.role} Account",
+            "My ${user?.role} Account",
             style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white, fontSize: 18),
           ),
         ),
@@ -150,41 +163,52 @@ class _AccountScreenState extends State<AccountScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.user.fullName,
+                    user?.fullName ?? '',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   Row(
                     spacing: 8,
                     children: [
                       Icon(Icons.email_outlined, color: AppColors.grayDarkest, size: 20),
-                      Text(widget.user.email, style: TextStyle(color: AppColors.grayDarkest)),
+                      Text(user?.email ?? '', style: TextStyle(color: AppColors.grayDarkest)),
                     ],
                   ),
                   Row(
                     spacing: 8,
                     children: [
                       Icon(Icons.location_city_outlined, color: AppColors.grayDarkest, size: 20),
-                      Text(widget.user.city, style: TextStyle(color: AppColors.grayDarkest)),
+                      Text(user?.city ?? '', style: TextStyle(color: AppColors.grayDarkest)),
                     ],
                   ),
                   Row(
                     spacing: 8,
                     children: [
                       Icon(Icons.location_on_outlined, color: AppColors.grayDarkest, size: 20),
-                      Text(widget.user.region, style: TextStyle(color: AppColors.grayDarkest)),
+                      Text(user?.region ?? '', style: TextStyle(color: AppColors.grayDarkest)),
                     ],
                   ),
                 ],
               ),
             ),
             InkWell(
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                if (user == null) return;
+                bool? result = await Navigator.push<bool?>(
                   context,
-                  MaterialPageRoute(builder: (context) => EditProfileScreen(user: widget.user)),
+                  MaterialPageRoute(builder: (context) => EditProfileScreen(user: user!)),
                 );
+                if (result != null && result == true) {
+                  UserModel? updatedUser = UserSession().user;
+                  if (updatedUser == null) return;
+                  setState(() {
+                    user = updatedUser;
+                  });
+                }
               },
-              child: Icon(Icons.edit_rounded, color: AppColors.primary),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 8, right: 8),
+                child: Icon(Icons.edit_rounded, color: AppColors.primary),
+              ),
             ),
           ],
         ),

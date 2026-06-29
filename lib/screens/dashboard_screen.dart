@@ -32,17 +32,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     List<Widget> screenList = widget.user.role == Constants.ROLE_DONOR
         ? [
-            DonorHomeScreen(user: widget.user),
+            DonorHomeScreen(),
             HistoryScreen(role: widget.user.role),
             DonorCreateScreen(),
             DonorNotificationScreen(),
-            AccountScreen(user: widget.user),
+            AccountScreen(),
           ]
         : [
             VolunteerHomeScreen(),
             HistoryScreen(role: widget.user.role),
             VolunteerNotificationScreen(),
-            AccountScreen(user: widget.user),
+            AccountScreen(),
           ];
 
     return Scaffold(
