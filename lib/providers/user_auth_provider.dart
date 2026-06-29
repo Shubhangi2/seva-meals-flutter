@@ -10,6 +10,16 @@ class UserAuthProvider extends ChangeNotifier {
   final AuthDatasource authDatasource;
 
   UserAuthProvider({required this.authDatasource});
+
+  int _selectedIndex = 0;
+
+  int get selectedIndex => _selectedIndex;
+
+  set selectedIndex(int index) {
+    _selectedIndex = index;
+    notifyListeners();
+  }
+
   Future<Either<Failure, UserModel>> createUserWithEmailAndPassword(
     String name,
     String email,

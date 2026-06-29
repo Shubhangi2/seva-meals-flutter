@@ -6,6 +6,7 @@ import 'package:seva_meal/db/shared_prefs.dart';
 import 'package:seva_meal/models/post_model.dart';
 import 'package:seva_meal/models/user_model.dart';
 import 'package:seva_meal/providers/donor_provider.dart';
+import 'package:seva_meal/providers/user_auth_provider.dart';
 import 'package:seva_meal/screens/shared_widgets/custom_button.dart';
 import 'package:seva_meal/screens/shared_widgets/donation_card.dart';
 import 'package:seva_meal/screens/shared_widgets/upsidedown_clipper.dart';
@@ -222,7 +223,9 @@ class _DonorHomeScreenState extends State<DonorHomeScreen> {
             SizedBox(
               height: 40,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.read<UserAuthProvider>().selectedIndex = 2;
+                },
                 child: Text("Post Donation", style: TextStyle(color: AppColors.primary)),
               ),
             ),

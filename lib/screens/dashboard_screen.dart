@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:seva_meal/core/app_colors.dart';
 import 'package:seva_meal/core/constants.dart';
 import 'package:seva_meal/models/user_model.dart';
+import 'package:seva_meal/providers/user_auth_provider.dart';
 import 'package:seva_meal/screens/donor/donor_notification_screen.dart';
 import 'package:seva_meal/screens/shared_screen/account_screen.dart';
 import 'package:seva_meal/screens/donor/donor_create_screen.dart';
@@ -25,8 +27,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    print(widget.user);
+    // Attach listener AFTER first frame so context is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserAuthProvider>().addListener(_onProviderChange);
+    });
   }
+
+  void _onProviderChange() => setState(() {
+    int selectedIndex = context.read<UserAuthProvider>().selectedIndex;
+    if (index == selectedIndex) return;
+    index = selectedIndex;
+    _pageController.jumpToPage(index);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -49,20 +61,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
-        onPageChanged: (pageIndex) {
-          setState(() {
-            index = pageIndex;
-          });
-        },
+        onPageChanged: (pageIndex) {},
         children: screenList,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        onTap: (int selectedIndex) => {
-          setState(() {
-            index = selectedIndex;
-            _pageController.jumpToPage(selectedIndex);
-          }),
-        },
+        onTap: (int selectedIndex) => {_pageController.jumpToPage(selectedIndex)},
         type: BottomNavigationBarType.fixed,
         currentIndex: index,
         backgroundColor: Colors.white,
